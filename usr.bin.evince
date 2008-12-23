@@ -1,0 +1,88 @@
+# vim:syntax=apparmor
+# Last Modified: Mon Dec 22 18:02:14 2008
+# Author: Kees Cook <kees@canonical.com>
+#         Jamie Strandboge <jamie@canonical.com>
+
+#include <tunables/global>
+
+/usr/bin/evince {
+  #include <abstractions/bash>
+  #include <abstractions/cups-client>
+  #include <abstractions/freedesktop.org>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+
+  #
+  # evince specific
+  #
+  /etc/ r,
+  /etc/fstab r,
+  /etc/xpdf/* r,
+  /usr/bin/bug-buddy px,
+  /usr/bin/evince mr,
+  /usr/bin/gs-esp ixr,
+  /usr/bin/yelp Px,
+  /usr/lib/ghostscript/** mr,
+  /usr/share/applications/** r,
+  /usr/share/evince/** r,
+  /usr/share/ghostscript/** r,
+  /usr/share/xpdf/** r,
+
+  # from http://live.gnome.org/Evince/SupportedDocumentFormats
+  /**.bmp r,
+  /**.BMP r,
+  /**.djvu r,
+  /**.DJVU r,
+  /**.dvi r,
+  /**.DVI r,
+  /**.gif r,
+  /**.GIF r,
+  /**.jpg r,
+  /**.JPG r,
+  /**.odp r,
+  /**.ODP r,
+  /**.pdf r,
+  /**.PDF r,
+  /**.pnm r,
+  /**.PNM r,
+  /**.png r,
+  /**.PNG r,
+  /**.ps r,
+  /**.PS r,
+  /**.tiff r,
+  /**.TIFF r,
+  /**.xpm r,
+  /**.XPM r,
+
+
+  #
+  # user configuration
+  #
+  @{HOME}/                       r,
+  @{HOME}/.config/user-dirs.dirs r,
+  @{HOME}/.gnome2/               r,
+  @{HOME}/.gnome2/evince/*       rwl,
+  @{HOME}/.gnome2/accels/        rw,
+  @{HOME}/.gnome2/accelsevince   rw,
+  @{HOME}/.gnome2/accels/evince  rw,
+  @{HOME}/.gnome2_private/       rw,
+  @{HOME}/.thumbnails/           r,
+  @{HOME}/.thumbnails/**         r,
+  @{HOME}/.xsession-errors       r,
+
+
+  #
+  # for maximum compatibility
+  #
+  @{HOME}/** rw,
+
+
+  #
+  # for more restricted access
+  #
+  #@{HOME}/**           r,
+  #@{HOME}/Desktop/**   rw,
+  #@{HOME}/Documents/** rw,
+  #@{HOME}/PDF          rw,
+}
+
