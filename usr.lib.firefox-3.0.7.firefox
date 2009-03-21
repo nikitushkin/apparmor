@@ -1,0 +1,166 @@
+# vim:syntax=apparmor
+# Last Modified: Thu Feb 12 08:02:13 2008
+# Author: Jamie Strandboge <jamie@canonical.com>
+
+#include <tunables/global>
+
+/usr/lib/firefox-3.0.7/firefox {
+  #include <abstractions/audio>
+  #include <abstractions/base>
+  #include <abstractions/cups-client>
+  #include <abstractions/dbus>
+  #include <abstractions/fonts>
+  #include <abstractions/freedesktop.org>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/X>
+
+  # for networking
+  network inet stream,
+
+  # why is this needed?
+  /etc/mtab r,
+  @{PROC}/[0-9]*/mounts r,
+  @{PROC}/[0-9]*/maps r,
+
+  # sounds
+  /dev/shm/ r,
+  /dev/shm/pulse-* rw,
+  /etc/sound/ r,
+  /etc/sound/** r,
+  /etc/pulse/client.conf r,
+  /etc/wildmidi/wildmidi.cfg r,
+
+  # should maybe be in abstractions
+  /etc/ r,
+  /etc/gnome/defaults.list r,
+  /etc/mime.types r,
+  /etc/mailcap r,
+  /usr/share/ r,
+  /usr/share/** r,
+  /usr/local/share/applications/ r,
+  /usr/local/share/applications/** r,
+  /usr/bin/dbus-launch ixr,
+
+  # firefox specific
+  /etc/firefox-3.0/ r,
+  /etc/firefox-3.0/** r,
+  /etc/xulrunner-1.9/ r,
+  /etc/xulrunner-1.9/** r,
+  /etc/gre.d/ r,
+  /etc/gre.d/* r,
+
+  # These are needed when a new user starts firefox and firefox.sh is used
+  /usr/lib/firefox*/** ixr,
+  /usr/bin/basename ixr,
+  /sbin/killall5 ixr,
+  @{PROC}/ r,
+  @{PROC}/[0-9]*/cmdline r,
+  @{PROC}/[0-9]*/stat r,
+  @{PROC}/[0-9]*/status r,
+  capability sys_ptrace,
+
+  #
+  # User specific
+  #
+
+  # Always deny these
+  deny @{HOME}/bin/ rw,
+  deny @{HOME}/bin/** mrwkl,
+  deny @{HOME}/.bash* mrwkl,
+  deny @{HOME}/.fetchmail* mrwkl,
+  deny @{HOME}/.*history mrwkl,
+  deny @{HOME}/.profile* mrwkl,
+  deny @{HOME}/.*rc mrwkl,
+  deny @{HOME}/.ssh/ rw,
+  deny @{HOME}/.ssh/** mrwkl,
+  deny @{HOME}/.gnome2_private/ rw,
+  deny @{HOME}/.gnome2_private/** mrwkl,
+  deny @{HOME}/.gnupg/ rw,
+  deny @{HOME}/.gnupg/** mrwkl,
+  deny @{HOME}/.viminfo* mrwkl,
+  deny @{HOME}/.*~ mrwkl,
+  deny @{HOME}/.*.swp mrwkl,
+  deny @{HOME}/.*~1~ mrwkl,
+  deny @{HOME}/.*.bak mrwkl,
+
+  # for maximum compatibility
+#  @{HOME}/ r,
+#  @{HOME}/** rwkl,
+
+  # For stricter access, comment out the 'maximum compatibility' lines above
+  # and uncomment these
+  @{HOME}/ r,
+  @{HOME}/[a-zA-Z0-9]* r,
+  @{HOME}/[a-zA-Z0-9]*/ r,
+  @{HOME}/[a-zA-Z0-9]*/** r,
+  @{HOME}/.local/ r,
+  @{HOME}/.local/** r,
+  @{HOME}/.mozilla/ rw,
+  @{HOME}/.mozilla/** rw,
+  @{HOME}/.mozilla/**/*.sqlite k,
+  @{HOME}/.mozilla/**/.parentlock k,
+  @{HOME}/Desktop/ r,
+  @{HOME}/Desktop/** rw,
+  @{HOME}/Firefox_wallpaper* rw,
+  @{HOME}/.thumbnails/** r,
+
+
+  #
+  # Plugins/helpers
+  #
+  @{PROC}/[0-9]*/fd/ r,
+  /usr/lib/ r,
+  /usr/lib/** rm,
+  /bin/bash ixr,
+  /bin/dash ixr,
+  /bin/grep ixr,
+  /bin/ps Uxr,
+  /bin/uname Uxr,
+  /usr/lib/nspluginwrapper/i386/linux/npviewer Uxr,
+  /var/lib/ r,
+  /var/lib/** mr,
+  # noisy
+  deny /bin/which mrx,
+
+  # for maximum plugin/helper compatibility
+#  /usr/bin/* Uxr,
+#  /usr/lib/*/** ixr,
+
+  #
+  # For stricter access, comment out the 'maximum plugin/helper compatibility'
+  # lines above and uncomment these
+  #
+
+  # adobe flash
+  @{HOME}/.adobe/ rw,
+  @{HOME}/.adobe/** rw,
+  @{HOME}/.macromedia/ rw,
+  @{HOME}/.macromedia/** rw,
+
+  # nspluginwrapper
+  /var/lib/flashplugin-nonfree/npwrapper.libflashplayer.so mr,
+
+  # miscellaneous
+  #/usr/bin/eog Uxr,
+  /usr/bin/evince Pxr,
+  /usr/bin/gedit Uxr,
+  /usr/bin/gimp* Uxr,
+  /usr/bin/file-roller Uxr,
+  /usr/bin/ooffice Uxr,
+  /usr/bin/oocalc Uxr,
+  /usr/bin/oodraw Uxr,
+  /usr/bin/ooimpress Uxr,
+  /usr/bin/oowriter Uxr,
+
+  # totem
+  /usr/lib/totem/** ixr,
+  /usr/bin/totem-gstreamer Uxr,
+  /usr/bin/totem-xine Uxr,
+
+  # icedtea
+  @{HOME}/.icedteaplugin/ rw,
+  @{HOME}/.icedteaplugin/** rw,
+
+}

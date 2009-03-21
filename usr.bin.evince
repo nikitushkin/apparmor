@@ -1,20 +1,22 @@
 # vim:syntax=apparmor
-# Last Modified: Mon Dec 22 18:02:14 2008
+# Last Modified: Fri Mar 20 15:02:14 2008
 # Author: Kees Cook <kees@canonical.com>
 #         Jamie Strandboge <jamie@canonical.com>
 
 #include <tunables/global>
 
 /usr/bin/evince {
+  #include <abstractions/audio>
   #include <abstractions/bash>
   #include <abstractions/cups-client>
+  #include <abstractions/dbus>
   #include <abstractions/freedesktop.org>
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
 
-  #
+  @{PROC}/[0-9]*/fd/ r,
+
   # evince specific
-  #
   /etc/ r,
   /etc/fstab r,
   /etc/xpdf/* r,
@@ -22,42 +24,17 @@
   /usr/bin/evince mr,
   /usr/bin/gs-esp ixr,
   /usr/bin/yelp Px,
+  /bin/gzip ixr,
   /usr/lib/ghostscript/** mr,
   /usr/share/applications/** r,
   /usr/share/evince/** r,
   /usr/share/ghostscript/** r,
   /usr/share/xpdf/** r,
 
-  # from http://live.gnome.org/Evince/SupportedDocumentFormats
-  /**.bmp r,
-  /**.BMP r,
-  /**.djvu r,
-  /**.DJVU r,
-  /**.dvi r,
-  /**.DVI r,
-  /**.gif r,
-  /**.GIF r,
-  /**.jpg r,
-  /**.JPG r,
-  /**.odp r,
-  /**.ODP r,
-  /**.pdf r,
-  /**.PDF r,
-  /**.pnm r,
-  /**.PNM r,
-  /**.png r,
-  /**.PNG r,
-  /**.ps r,
-  /**.PS r,
-  /**.tiff r,
-  /**.TIFF r,
-  /**.xpm r,
-  /**.XPM r,
+  # this should be in its own abstraction
+  /usr/bin/launchpad-integration Uxr,
 
-
-  #
-  # user configuration
-  #
+  # user configuration (perhaps in gnome abstraction?)
   @{HOME}/                       r,
   @{HOME}/.config/user-dirs.dirs r,
   @{HOME}/.gnome2/               r,
@@ -70,19 +47,25 @@
   @{HOME}/.thumbnails/**         r,
   @{HOME}/.xsession-errors       r,
 
+  #
+  # User specific
+  #
 
-  #
-  # for maximum compatibility
-  #
-  @{HOME}/** rw,
+  # from http://live.gnome.org/Evince/SupportedDocumentFormats
+  /**.[bB][mM][pP]     r,
+  /**.[dD][jJ][vV][uU] r,
+  /**.[dD][vV][iI]     r,
+  /**.[gG][iI][fF]     r,
+  /**.[jJ][pP][gG]     r,
+  /**.[jJ][pP][eE][gG] r,
+  /**.[oO][dD][pP]     r,
+  /**.[pP][dD][fF]     r,
+  /**.[pP][nN][mM]     r,
+  /**.[pP][nN][gG]     r,
+  /**.[pP][sS]         r,
+  /**.[tT][iI][fF][fF] r,
+  /**.[xX][pP][mM]     r,
+  /**.[gG][zZ]         r,
 
-
-  #
-  # for more restricted access
-  #
-  #@{HOME}/**           r,
-  #@{HOME}/Desktop/**   rw,
-  #@{HOME}/Documents/** rw,
-  #@{HOME}/PDF          rw,
 }
 
