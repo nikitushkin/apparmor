@@ -23,11 +23,11 @@
   #/var/log/lighttpd/ r,
   #/var/log/lighttpd/** r,
 
-  deny @{HOME}/.* mrwkl,
-  deny @{HOME}/.*/ rw,
-  deny @{HOME}/.*/** mrwkl,
-  deny @{HOME}/bin/ rw,
-  deny @{HOME}/bin/** mrwkl,
+  audit deny @{HOME}/.* mrwkl,
+  audit deny @{HOME}/.*/ rw,
+  audit deny @{HOME}/.*/** mrwkl,
+  audit deny @{HOME}/bin/ rw,
+  audit deny @{HOME}/bin/** mrwkl,
   @{HOME}/ r,
   @{HOME}/** rw,
 }
