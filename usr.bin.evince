@@ -51,6 +51,30 @@
   # User specific
   #
 
+  # Always deny these
+  deny @{HOME}/bin/ rw,
+  deny @{HOME}/bin/** mrwkl,
+  deny @{HOME}/.bash* mrwkl,
+  deny @{HOME}/.fetchmail* mrwkl,
+  deny @{HOME}/.*history mrwkl,
+  deny @{HOME}/.profile* mrwkl,
+  deny @{HOME}/.*rc mrwkl,
+  deny @{HOME}/.ssh/ rw,
+  deny @{HOME}/.ssh/** mrwkl,
+  deny @{HOME}/.gnome2_private/ rw,
+  deny @{HOME}/.gnome2_private/** mrwkl,
+  deny @{HOME}/.gnupg/ rw,
+  deny @{HOME}/.gnupg/** mrwkl,
+  deny @{HOME}/.viminfo* mrwkl,
+  deny @{HOME}/.*~ mrwkl,
+  deny @{HOME}/.*.swp mrwkl,
+  deny @{HOME}/.*~1~ mrwkl,
+  deny @{HOME}/.*.bak mrwkl,
+
+  # This is needed for directories
+  @{HOME}/ r,
+  @{HOME}/** r,
+
   # from http://live.gnome.org/Evince/SupportedDocumentFormats
   /**.[bB][mM][pP]     r,
   /**.[dD][jJ][vV][uU] r,
