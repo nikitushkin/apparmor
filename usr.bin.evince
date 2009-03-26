@@ -13,6 +13,7 @@
   #include <abstractions/freedesktop.org>
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
+  #include <abstractions/launchpad-integration>
 
   @{PROC}/[0-9]*/fd/ r,
 
@@ -30,9 +31,6 @@
   /usr/share/evince/** r,
   /usr/share/ghostscript/** r,
   /usr/share/xpdf/** r,
-
-  # this should be in its own abstraction
-  /usr/bin/launchpad-integration Uxr,
 
   # user configuration (perhaps in gnome abstraction?)
   @{HOME}/                       r,

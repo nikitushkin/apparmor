@@ -1,0 +1,5 @@
+# vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
+
+# this is used when using Help/Report a problem
+/usr/bin/launchpad-integration Uxr,
