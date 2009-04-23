@@ -1,10 +1,10 @@
 # vim:syntax=apparmor
-# Last Modified: Thu Feb 12 08:02:13 2008
+# Last Modified: Thu Apr 23 08:04:13 2009
 # Author: Jamie Strandboge <jamie@canonical.com>
 
 #include <tunables/global>
 
-/usr/lib/firefox-3.0.7/firefox {
+/usr/lib/firefox-3.0.9/firefox {
   #include <abstractions/audio>
   #include <abstractions/base>
   #include <abstractions/cups-client>
@@ -69,7 +69,7 @@
   audit deny @{HOME}/bin/ rw,
   audit deny @{HOME}/bin/** mrwkl,
   audit deny @{HOME}/.bash* mrwkl,
-  audit deny @{HOME}/.fetchmail* mrwkl,
+  audit deny @{HOME}/.fetchmailrc* mrwkl,
   audit deny @{HOME}/.*history mrwkl,
   audit deny @{HOME}/.profile* mrwkl,
   audit deny @{HOME}/.*rc mrwkl,
@@ -80,10 +80,10 @@
   audit deny @{HOME}/.gnupg/ rw,
   audit deny @{HOME}/.gnupg/** mrwkl,
   audit deny @{HOME}/.viminfo* mrwkl,
-  audit deny @{HOME}/.*~ mrwkl,
-  audit deny @{HOME}/.*.swp mrwkl,
-  audit deny @{HOME}/.*~1~ mrwkl,
-  audit deny @{HOME}/.*.bak mrwkl,
+  deny @{HOME}/.*~ mrwkl,
+  deny @{HOME}/.*.swp mrwkl,
+  deny @{HOME}/.*~1~ mrwkl,
+  deny @{HOME}/.*.bak mrwkl,
 
   # for maximum compatibility
 #  @{HOME}/ r,
