@@ -1,0 +1,18 @@
+# Last Modified: Sat Oct 11 09:17:38 2008
+#include <tunables/global>
+/usr/lib/dovecot/imap {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  capability setgid,
+  capability setuid,
+
+  /home/*/ r,
+  /home/*/Maildir/ rw,
+  /home/*/Maildir/** klrw,
+  /home/*/mail/ rw,
+  /home/*/mail/* klrw,
+  /home/*/mail/.imap/** klrw,
+  /usr/lib/dovecot/imap mr,
+  /var/mail/* klrw,
+}
