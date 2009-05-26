@@ -1,4 +1,5 @@
 # Last Modified: Fri Oct 10 17:19:26 2008
+# Author: Kees Cook <kees@ubuntu.com>
 #include <tunables/global>
 /usr/lib/dovecot/dovecot-auth {
   #include <abstractions/authentication>
