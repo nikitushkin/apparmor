@@ -1,5 +1,5 @@
 # vim:syntax=apparmor
-# Last Modified: Fri Mar 20 15:02:14 2008
+# Last Modified: Fri Jun 05 15:32:14 2008
 # Author: Kees Cook <kees@canonical.com>
 #         Jamie Strandboge <jamie@canonical.com>
 
@@ -14,6 +14,8 @@
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
   #include <abstractions/launchpad-integration>
+  #include <abstractions/privacy-violations>
+  #include <abstractions/privacy-violations-strict>
 
   @{PROC}/[0-9]*/fd/ r,
 
@@ -24,7 +26,7 @@
   /usr/bin/bug-buddy px,
   /usr/bin/evince mr,
   /usr/bin/gs-esp ixr,
-  /usr/bin/yelp Px,
+  /usr/bin/yelp Ux,
   /bin/gzip ixr,
   /usr/lib/ghostscript/** mr,
   /usr/share/applications/** r,
@@ -32,62 +34,33 @@
   /usr/share/ghostscript/** r,
   /usr/share/xpdf/** r,
 
-  # user configuration (perhaps in gnome abstraction?)
-  @{HOME}/                       r,
-  @{HOME}/.config/user-dirs.dirs r,
-  @{HOME}/.gnome2/               r,
+  @{HOME}/ r,
+  @{HOME}/** r,
   @{HOME}/.gnome2/evince/*       rwl,
   @{HOME}/.gnome2/accels/        rw,
   @{HOME}/.gnome2/accelsevince   rw,
   @{HOME}/.gnome2/accels/evince  rw,
-  @{HOME}/.gnome2_private/       rw,
-  @{HOME}/.thumbnails/           r,
-  @{HOME}/.thumbnails/**         r,
-  @{HOME}/.xsession-errors       r,
 
-  #
-  # User specific
-  #
+  # from http://live.gnome.org/Evince/SupportedDocumentFormats. Allow
+  # read and write for all supported file formats
+  /**.[bB][mM][pP]     rw,
+  /**.[dD][jJ][vV][uU] rw,
+  /**.[dD][vV][iI]     rw,
+  /**.[gG][iI][fF]     rw,
+  /**.[jJ][pP][gG]     rw,
+  /**.[jJ][pP][eE][gG] rw,
+  /**.[oO][dD][pP]     rw,
+  /**.[pP][dD][fF]     rw,
+  /**.[pP][nN][mM]     rw,
+  /**.[pP][nN][gG]     rw,
+  /**.[pP][sS]         rw,
+  /**.[tT][iI][fF][fF] rw,
+  /**.[xX][pP][mM]     rw,
+  /**.[gG][zZ]         rw,
 
-  # Always deny these
-  audit deny @{HOME}/bin/ rw,
-  audit deny @{HOME}/bin/** mrwkl,
-  audit deny @{HOME}/.bash* mrwkl,
-  audit deny @{HOME}/.fetchmail* mrwkl,
-  audit deny @{HOME}/.*history mrwkl,
-  audit deny @{HOME}/.profile* mrwkl,
-  audit deny @{HOME}/.*rc mrwkl,
-  audit deny @{HOME}/.ssh/ rw,
-  audit deny @{HOME}/.ssh/** mrwkl,
-  audit deny @{HOME}/.gnome2_private/ rw,
-  audit deny @{HOME}/.gnome2_private/** mrwkl,
-  audit deny @{HOME}/.gnupg/ rw,
-  audit deny @{HOME}/.gnupg/** mrwkl,
-  audit deny @{HOME}/.viminfo* mrwkl,
-  audit deny @{HOME}/.*~ mrwkl,
-  audit deny @{HOME}/.*.swp mrwkl,
-  audit deny @{HOME}/.*~1~ mrwkl,
-  audit deny @{HOME}/.*.bak mrwkl,
-
-  # This is needed for directories
-  @{HOME}/ r,
-  @{HOME}/** r,
-
-  # from http://live.gnome.org/Evince/SupportedDocumentFormats
-  /**.[bB][mM][pP]     r,
-  /**.[dD][jJ][vV][uU] r,
-  /**.[dD][vV][iI]     r,
-  /**.[gG][iI][fF]     r,
-  /**.[jJ][pP][gG]     r,
-  /**.[jJ][pP][eE][gG] r,
-  /**.[oO][dD][pP]     r,
-  /**.[pP][dD][fF]     r,
-  /**.[pP][nN][mM]     r,
-  /**.[pP][nN][gG]     r,
-  /**.[pP][sS]         r,
-  /**.[tT][iI][fF][fF] r,
-  /**.[xX][pP][mM]     r,
-  /**.[gG][zZ]         r,
+  # evince creates a temporary stream file like '.goutputstream-XXXXXX' in the
+  # directory a file is saved. This allows that behavior.
+  owner /**/.goutputstream-* w,
 
 }
 
