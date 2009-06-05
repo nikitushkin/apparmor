@@ -14,8 +14,7 @@
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
   #include <abstractions/launchpad-integration>
-  #include <abstractions/privacy-violations>
-  #include <abstractions/privacy-violations-strict>
+  #include <abstractions/private-files-strict>
 
   @{PROC}/[0-9]*/fd/ r,
 
