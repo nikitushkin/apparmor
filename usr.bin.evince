@@ -1,5 +1,5 @@
 # vim:syntax=apparmor
-# Last Modified: Fri Jun 05 15:32:14 2008
+# Last Modified: Tue Jun 09 14:34:12 2009
 # Author: Kees Cook <kees@canonical.com>
 #         Jamie Strandboge <jamie@canonical.com>
 
@@ -32,6 +32,11 @@
   /usr/share/evince/** r,
   /usr/share/ghostscript/** r,
   /usr/share/xpdf/** r,
+
+  # allow directory listings (ie 'r' on directories) so browsing via the file
+  # dialog works
+  / r,
+  /**/ r,
 
   @{HOME}/ r,
   @{HOME}/** r,
