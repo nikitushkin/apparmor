@@ -1,10 +1,10 @@
 # vim:syntax=apparmor
-# Last Modified: Thu Apr 23 08:04:13 2009
+# Last Modified: Tue Jun  9 07:32:13 2009
 # Author: Jamie Strandboge <jamie@canonical.com>
 
 #include <tunables/global>
 
-/usr/lib/firefox-3.0.9/firefox {
+/usr/lib/firefox-3.0.10/firefox {
   #include <abstractions/audio>
   #include <abstractions/base>
   #include <abstractions/cups-client>
@@ -19,17 +19,9 @@
   # for networking
   network inet stream,
 
-  # why is this needed?
-  /etc/mtab r,
-  @{PROC}/[0-9]*/mounts r,
-  @{PROC}/[0-9]*/maps r,
-
   # sounds
-  /dev/shm/ r,
-  /dev/shm/pulse-* rw,
   /etc/sound/ r,
   /etc/sound/** r,
-  /etc/pulse/client.conf r,
   /etc/wildmidi/wildmidi.cfg r,
 
   # should maybe be in abstractions
@@ -37,22 +29,18 @@
   /etc/gnome/defaults.list r,
   /etc/mime.types r,
   /etc/mailcap r,
-  /usr/share/ r,
-  /usr/share/** r,
-  /usr/local/share/applications/ r,
-  /usr/local/share/applications/** r,
   /usr/bin/dbus-launch ixr,
 
   # firefox specific
-  /etc/firefox-3.0/ r,
-  /etc/firefox-3.0/** r,
-  /etc/xulrunner-1.9/ r,
-  /etc/xulrunner-1.9/** r,
+  /etc/firefox-3.*/ r,
+  /etc/firefox-3.*/** r,
+  /etc/xulrunner-1.9*/ r,
+  /etc/xulrunner-1.9*/** r,
   /etc/gre.d/ r,
   /etc/gre.d/* r,
 
   # These are needed when a new user starts firefox and firefox.sh is used
-  /usr/lib/firefox*/** ixr,
+  /usr/lib/firefox-3.*/** ixr,
   /usr/bin/basename ixr,
   /sbin/killall5 ixr,
   @{PROC}/ r,
@@ -61,63 +49,55 @@
   @{PROC}/[0-9]*/status r,
   capability sys_ptrace,
 
-  #
-  # User specific
-  #
+  /etc/mtab r,
+  @{PROC}/[0-9]*/mounts r,
+  @{PROC}/[0-9]*/maps r,
 
-  # Always deny these
-  audit deny @{HOME}/bin/ rw,
-  audit deny @{HOME}/bin/** mrwkl,
-  audit deny @{HOME}/.bash* mrwkl,
-  audit deny @{HOME}/.fetchmailrc* mrwkl,
-  audit deny @{HOME}/.*history mrwkl,
-  audit deny @{HOME}/.profile* mrwkl,
-  audit deny @{HOME}/.*rc mrwkl,
-  audit deny @{HOME}/.ssh/ rw,
-  audit deny @{HOME}/.ssh/** mrwkl,
-  audit deny @{HOME}/.gnome2_private/ rw,
-  audit deny @{HOME}/.gnome2_private/** mrwkl,
-  audit deny @{HOME}/.gnupg/ rw,
-  audit deny @{HOME}/.gnupg/** mrwkl,
-  audit deny @{HOME}/.viminfo* mrwkl,
-  deny @{HOME}/.*~ mrwkl,
-  deny @{HOME}/.*.swp mrwkl,
-  deny @{HOME}/.*~1~ mrwkl,
-  deny @{HOME}/.*.bak mrwkl,
+  # allow access to documentation and other files the user may want to look
+  # at in /usr
+  /usr/ r,
+  /usr/** r,
 
-  # for maximum compatibility
-#  @{HOME}/ r,
-#  @{HOME}/** rwkl,
-
-  # For stricter access, comment out the 'maximum compatibility' lines above
-  # and uncomment these
+  # allow read and write to all user's files, except explicitly denied ones
   @{HOME}/ r,
-  @{HOME}/[a-zA-Z0-9]* r,
-  @{HOME}/[a-zA-Z0-9]*/ r,
-  @{HOME}/[a-zA-Z0-9]*/** r,
+  @{HOME}/** rw,
+  @{HOME}/Desktop/** rw,
+  @{HOME}/Firefox_wallpaper* rw,
   @{HOME}/.local/ r,
   @{HOME}/.local/** r,
+  @{HOME}/.thumbnails/** r,
+
+  #include <abstractions/private-files>
+  audit deny @{HOME}/.ssh/** mrwkl,
+  audit deny @{HOME}/.gnome2_private/** mrwkl,
+  # uncomment these if using gpg plugin/addons
+  audit deny @{HOME}/.gnupg/** mrwkl,
+
+  # per-user firefox configuration
   @{HOME}/.mozilla/ rw,
   @{HOME}/.mozilla/** rw,
   @{HOME}/.mozilla/**/*.sqlite k,
   @{HOME}/.mozilla/**/.parentlock k,
-  @{HOME}/Desktop/ r,
-  @{HOME}/Desktop/** rw,
-  @{HOME}/Firefox_wallpaper* rw,
-  @{HOME}/.thumbnails/** r,
 
+  # per-user common plugin configuration
+  @{HOME}/.icedteaplugin/ rw,
+  @{HOME}/.icedteaplugin/** rw,
+  @{HOME}/.adobe/ rw,
+  @{HOME}/.adobe/** rw,
+  @{HOME}/.macromedia/ rw,
+  @{HOME}/.macromedia/** rw,
 
   #
   # Plugins/helpers
   #
   @{PROC}/[0-9]*/fd/ r,
-  /usr/lib/ r,
   /usr/lib/** rm,
   /bin/bash ixr,
   /bin/dash ixr,
   /bin/grep ixr,
   /bin/ps Uxr,
   /bin/uname Uxr,
+  /usr/bin/m4 ixr,
   /usr/lib/nspluginwrapper/i386/linux/npviewer Uxr,
   /var/lib/ r,
   /var/lib/** mr,
@@ -133,18 +113,11 @@
   # lines above and uncomment these
   #
 
-  # adobe flash
-  @{HOME}/.adobe/ rw,
-  @{HOME}/.adobe/** rw,
-  @{HOME}/.macromedia/ rw,
-  @{HOME}/.macromedia/** rw,
-
-  # nspluginwrapper
-  /var/lib/flashplugin-nonfree/npwrapper.libflashplayer.so mr,
+  # TODO: test this with and without an evince profile
+  /usr/bin/evince Pxr,
 
   # miscellaneous
   #/usr/bin/eog Uxr,
-  /usr/bin/evince Pxr,
   /usr/bin/gedit Uxr,
   /usr/bin/gimp* Uxr,
   /usr/bin/file-roller Uxr,
@@ -158,9 +131,5 @@
   /usr/lib/totem/** ixr,
   /usr/bin/totem-gstreamer Uxr,
   /usr/bin/totem-xine Uxr,
-
-  # icedtea
-  @{HOME}/.icedteaplugin/ rw,
-  @{HOME}/.icedteaplugin/** rw,
 
 }
