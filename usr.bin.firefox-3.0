@@ -63,9 +63,6 @@
   @{HOME}/** rw,
   @{HOME}/Desktop/** rw,
   @{HOME}/Firefox_wallpaper* rw,
-  @{HOME}/.local/ r,
-  @{HOME}/.local/** r,
-  @{HOME}/.thumbnails/** r,
 
   #include <abstractions/private-files>
   audit deny @{HOME}/.ssh/** mrwkl,
