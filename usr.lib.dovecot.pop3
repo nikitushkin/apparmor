@@ -9,10 +9,10 @@
   capability setuid,
 
   /var/mail/* klrw,
-  /home/*/ r,
-  /home/*/mail/* klrw,
-  /home/*/mail/.imap/** klrw,
-  /home/*/Maildir/ rw,
-  /home/*/Maildir/** klrw,
+  @{HOME} r,
+  @{HOME}/mail/* klrw,
+  @{HOME}/mail/.imap/** klrw,
+  @{HOME}/Maildir/ rw,
+  @{HOME}/Maildir/** klrw,
   /usr/lib/dovecot/pop3 mr,
 }

@@ -1,19 +1,20 @@
-# Last Modified: Sat Oct 11 09:17:38 2008
-# Author: Kees Cook <kees@ubuntu.com>
+# Last Modified: Wed Jun 10 00:20:56 2009
+# Author: Dulmandakh Sukhbaatar <dulmandakh@gmail.com>
 #include <tunables/global>
-/usr/lib/dovecot/imap {
+/usr/lib/dovecot/deliver {
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
   capability setgid,
   capability setuid,
 
+  /etc/dovecot/dovecot-postfix.conf r,
   @{HOME} r,
   @{HOME}/Maildir/ rw,
   @{HOME}/Maildir/** klrw,
   @{HOME}/mail/ rw,
   @{HOME}/mail/* klrw,
   @{HOME}/mail/.imap/** klrw,
-  /usr/lib/dovecot/imap mr,
+  /usr/lib/dovecot/deliver mr,
   /var/mail/* klrw,
 }
