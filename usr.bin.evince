@@ -39,7 +39,13 @@
   /**/ r,
 
   @{HOME}/ r,
-  @{HOME}/** r,
+
+  # This is need for saving files in your home directory without an extension.
+  # Changing this to '@{HOME}/** r' makes it require an extension and more
+  # secure (but with 'rw', we still have abstractions/private-files-strict in
+  # effect).
+  @{HOME}/** rw,
+
   @{HOME}/.gnome2/evince/*       rwl,
   @{HOME}/.gnome2/accels/        rw,
   @{HOME}/.gnome2/accelsevince   rw,
