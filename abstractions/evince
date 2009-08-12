@@ -14,9 +14,12 @@
   #include <abstractions/private-files-strict>
 
   @{PROC}/[0-9]*/fd/ r,
+  @{PROC}/[0-9]*/mountinfo r,
 
-  # move out to gnome abstraction if anyone else needs these
+  # move out to the gnome abstraction if anyone else needs these
   /dev/.udev/db/* r,
+  /etc/udev/udev.conf r,
+  /sys/devices/**/block/**/uevent r,
 
   # evince specific
   /etc/ r,
