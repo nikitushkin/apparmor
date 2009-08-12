@@ -6,32 +6,9 @@
 #include <tunables/global>
 
 /usr/bin/evince {
-  #include <abstractions/audio>
-  #include <abstractions/bash>
-  #include <abstractions/cups-client>
-  #include <abstractions/dbus>
-  #include <abstractions/freedesktop.org>
-  #include <abstractions/gnome>
-  #include <abstractions/nameservice>
-  #include <abstractions/launchpad-integration>
-  #include <abstractions/private-files-strict>
+  #include <abstractions/evince>
 
-  @{PROC}/[0-9]*/fd/ r,
-
-  # evince specific
-  /etc/ r,
-  /etc/fstab r,
-  /etc/xpdf/* r,
-  /usr/bin/bug-buddy px,
   /usr/bin/evince mr,
-  /usr/bin/gs-esp ixr,
-  /usr/bin/yelp Ux,
-  /bin/gzip ixr,
-  /usr/lib/ghostscript/** mr,
-  /usr/share/applications/** r,
-  /usr/share/evince/** r,
-  /usr/share/ghostscript/** r,
-  /usr/share/xpdf/** r,
 
   # allow directory listings (ie 'r' on directories) so browsing via the file
   # dialog works
@@ -71,6 +48,24 @@
   # evince creates a temporary stream file like '.goutputstream-XXXXXX' in the
   # directory a file is saved. This allows that behavior.
   owner /**/.goutputstream-* w,
-
 }
 
+/usr/bin/evince-previewer {
+  #include <abstractions/evince>
+
+  /usr/bin/evince-previewer mr,
+
+  @{HOME}/ r,
+  @{HOME}/** r,
+}
+
+/usr/bin/evince-thumbnailer {
+  #include <abstractions/evince>
+
+  /usr/bin/evince-thumbnailer mr,
+
+  # Lenient, but remember we still have abstractions/private-files-strict in
+  # effect).
+  @{HOME}/ r,
+  @{HOME}/** rw,
+}
