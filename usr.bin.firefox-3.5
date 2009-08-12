@@ -4,7 +4,7 @@
 
 #include <tunables/global>
 
-/usr/lib/firefox-3.0.*/firefox {
+/usr/lib/firefox-3.5.*/firefox {
   #include <abstractions/audio>
   #include <abstractions/base>
   #include <abstractions/cups-client>
@@ -104,6 +104,9 @@
   /var/lib/** mr,
   # noisy
   deny /bin/which mrx,
+  deny /usr/share/mozilla/extensions/**/ w,
+  deny /usr/lib/mozilla/extensions/**/ w,
+  deny /usr/lib/firefox-3.5.2/update.test w,
 
   # for maximum plugin/helper compatibility
 #  /usr/bin/* Uxr,
