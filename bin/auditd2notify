@@ -24,8 +24,11 @@ gksudo -- tail -f "$logfile" | while read message; do
     if echo "$message" | grep -q -v "$search" ; then
         continue
     fi
-    #zenity --warning --title "AppArmor Message" --text "$message"
-    notify-send -i gtk-dialog-warning -u critical -t 30000 -- "AppArmor Message" "$message"
+    type="gtk-dialog-warning"
+    if echo "$message" | grep -q "APPARMOR_STATUS" ; then
+        type="gtk-dialog-info"
+    fi
+    notify-send -i $type -u critical -t 30000 -- "AppArmor Message" "$message"
     sleep 1
 done
 
