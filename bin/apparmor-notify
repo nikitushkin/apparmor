@@ -1,0 +1,98 @@
+#!/bin/sh
+#
+# Author: Jamie Strandboge <jamie@ubuntu.com>
+# Copyright (C) 2009 Canonical Ltd.
+#
+# This script is distributed under the terms and conditions of the GNU General
+# Public License, Version 3 or later. See http://www.gnu.org/copyleft/gpl.html
+# for details.
+#
+# Script to run on a desktop system to get AppArmor notifications.
+#
+# TODO:
+#  - add rate limiting for same profile
+#  - make message prettier (eg, profile, file, access)
+#
+
+set -e
+
+conf="/etc/apparmor/notify.conf"
+user_conf="$HOME/.apparmor_notify.conf"
+
+use_group=""
+if [ -s "$conf" ]; then
+    . "$conf"
+    if [ -n "$use_group" ] && id | grep -qv "($use_group)" ; then
+        echo "Must be in '$use_group' group. Aborting" >&2
+        exit 0
+    fi
+fi
+
+notify_exe=`which notify-send` || true
+if [ -z "$notify_exe" ] || [ ! -x "$notify_exe" ]; then
+    echo "Could not find 'notify-send'. Please install libnotify-bin" >&2
+    exit 1
+fi
+
+show_notifications=""
+if [ -s "$user_conf" ]; then
+    . "$user_conf"
+    if [ "$show_notifications" != "yes" ]; then
+        echo "'show_notifications' disabled in '$user_conf'. Aborting" >&2
+        exit 0
+    fi
+else
+    tmp=`mktemp`
+    cat > "$tmp" << EOM
+# set to 'yes' to enable AppArmor DENIED notifications
+show_notifications="yes"
+
+# set to 'yes' to enable AppArmor STATUS notifications when using auditd
+show_status="no"
+
+# set to 'yes' to use gksudo to read /var/log/audit/audit.log when using
+# auditd
+use_gksudo="no"
+EOM
+    mv "$tmp" "$user_conf"
+fi
+
+taillog() {
+    if pidof /sbin/auditd >/dev/null ; then
+        logfile="/var/log/audit/audit.log"
+        if [ "$use_gksudo" = "yes" ]; then
+            gksudo --message "The application 'apparmor-notify' requires permission to read '$logfile'" -- tail -f "$logfile"
+        elif [ -r "$logfile" ]; then
+            tail -f "$logfile"
+        else
+             echo "Could not read '$logfile'. Aborting" >&2
+             exit 1
+        fi
+    else
+        tail -f /var/log/kern.log
+    fi
+}
+
+taillog | while read message; do
+    if echo "$message" | egrep -q -v '(denied|APPARMOR_STATUS)'; then
+        continue
+    fi
+    if echo "$message" | egrep -q -v 'audit\([0-9.:]+\).*' ; then
+        continue
+    fi
+
+    type=""
+    if [ "$show_status" = "yes" ] && echo "$message" | grep -q "APPARMOR_STATUS" ; then
+        # status message
+        type="gtk-dialog-info"
+    elif echo "$message" | egrep -i 'denied' | egrep -q ' profile='; then
+        # denied message
+        type="gtk-dialog-warning"
+    else
+        # anything else, ignore
+        continue
+    fi
+    "$notify_exe" -i $type -u critical -t 30000 -- "AppArmor Message" "$message"
+    sleep 1
+done
+
