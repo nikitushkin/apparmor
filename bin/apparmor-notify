@@ -80,6 +80,9 @@ taillog | while read message; do
     if echo "$message" | egrep -q -v 'audit\([0-9.:]+\).*' ; then
         continue
     fi
+    if echo "$message" | egrep 'APPARMOR_ALLOWED' ; then
+        continue
+    fi
 
     type=""
     if [ "$show_status" = "yes" ] && echo "$message" | grep -q "APPARMOR_STATUS" ; then
