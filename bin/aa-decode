@@ -1,22 +1,11 @@
 #!/bin/sh
 #
 # Author: Jamie Strandboge <jamie@ubuntu.com>
-# Copyright (C) 2009 Canonical Ltd.
+# Copyright (C) 2009-2010 Canonical Ltd.
 #
 # This script is distributed under the terms and conditions of the GNU General
 # Public License, Version 3 or later. See http://www.gnu.org/copyleft/gpl.html
 # for details.
-#
-# Script to decode the hex-encoded string like from syslog:
-# ... audit(1250636171.706:27): operation="mknod" info="Failed name lookup - deleted entry" error=-2 pid=7731 parent=4075 profile="/usr/bin/evince" requested_mask="w::" denied_mask="w::" fsuid=1000 ouid=1000 name=2F686F6D652F74776967617468792F2E726563656E746C792D757365642E7862656C2E444555495955202864656C6574656429
-#
-# Eg:
-# $ aa-decode 2F686F6D652F74776967617468792F2E726563656E746C792D757365642E7862656C2E444555495955202864656C6574656429
-# Decoded: /home/twigathy/.recently-used.xbel.DEUIYU (deleted)
-#
-# $ sudo cat /var/log/audit/audit.log | aa-decode
-# type=APPARMOR_DENIED msg=audit(1250356898.461:22): operation="mkdir" pid=5028 parent=1 profile="/usr/lib/firefox-3.5.*/firefox" requested_mask="w::" denied_mask="w::" fsuid=1000 ouid=1000 name='/usr/lib/firefox-addons/extensions/Access Privileges Test/'
-# type=APPARMOR_DENIED msg=audit(1250516856.318:23): operation="mkdir" pid=4870 parent=1 profile="/usr/lib/firefox-3.5.*/firefox" requested_mask="w::" denied_mask="w::" fsuid=1000 ouid=1000 name='/usr/lib/firefox-addons/extensions/Access Privileges Test/'
 #
 
 set -e
@@ -38,24 +27,10 @@ EOM
 
 decode() {
     encoded="$1"
-
-    if ! echo "$encoded" | egrep -q "^[0-9a-fA-F]+$" ; then
-        echo "String should only contain hex characters (0-9, a-f, A-G)"
-        return
-    fi
-
     len=`echo "$encoded" | wc -m`
     decoded=""
-    index=1
-    while /bin/true; do
-        tmp=`echo "$encoded" | cut -b $index-$((index+1))`
-        if [ -z "$tmp" ]; then
-            break
-        fi
-        tmpc=`echo "$tmp" | tr -s '[:lower:]' '[:upper:]' | sed 's/^/ibase=16;print /g' | bc | awk '{printf("%c", $0);}'`
-        decoded="$decoded$tmpc"
-        index=$((index+2))
-    done
+
+    decoded=`perl -le "\\$s = '$encoded' ; print pack 'H*', \\$s"`
     echo "$decoded"
 }
 
@@ -66,22 +41,26 @@ fi
 
 # if have an argument, then use it, otherwise process stdin
 if [ -n "$1" ]; then
-    d=`decode $1`
+    e=`echo "$1" | tr -s '[:lower:]' '[:upper:]'`
+    if ! echo "$e" | egrep -q "^[0-9A-F]+$" ; then
+        echo "String should only contain hex characters (0-9, a-f, A-F)"
+        return
+    fi
+
+    d=`decode $e`
     if [ -z "$d" ]; then
         echo "Could not decode string"
         exit 1
     fi
+
     echo "Decoded: $d"
     exit 0
 fi
 
-# read stdin
-while read line; do
-    if ! echo "$line" | egrep -q ' name=2[fF][0-9a-fA-F]*$' ; then
-        continue
-    fi
-    e=`echo "$line" | sed 's/.* name=\(.*\)/\\1/g'`
-    echo "Processing: $e"
+# AppArmor logs always have 'name=...' last in the log entry, so validate input
+# against this and output based on it
+egrep ' name=2[fF][0-9a-fA-F]*$' | while read line ; do
+    e=`echo "$line" | sed 's/.* name=\(.*\)/\\1/g' | tr -s '[:lower:]' '[:upper:]'`
     d=`decode $e`
     echo -n "$line" | sed "s/\(.*\) name=.*/\1 name=/g"
     echo "'$d'"
