@@ -39,22 +39,26 @@ my $last_exe = "/usr/bin/last";
 my $url = "https://wiki.ubuntu.com/DebuggingApparmor";
 
 sub readconf;
-sub error;
-sub debug;
-sub cleanup;
-sub usage;
+sub parse_message;
 sub format_message;
+sub format_stats;
 sub do_notify;
 sub show_since;
+sub do_last;
+sub do_show_messages;
+sub error;
+sub debug;
+sub exitscript;
+sub usage;
 
 #
 # Main script
 #
 
-# be safe
+# Clean environment
 $ENV{PATH} = "/bin:/usr/bin";
 $ENV{SHELL} = "/bin/sh";
-$ENV{IFS} = "" if defined($ENV{IFS}) and $ENV{IFS} ne "";
+defined($ENV{IFS}) and $ENV{IFS} = ' \t\n';
 
 my $logfile = "/var/log/kern.log";
 -e "/var/run/auditd.pid" and $logfile = "/var/log/audit/audit.log";
@@ -62,12 +66,15 @@ my $logfile = "/var/log/kern.log";
 $> == $< or die "Cannot be suid\n";
 $) == $( or die "Cannot be sgid\n";
 
+my $login = getlogin();
+
 open (LOGFILE, "<$logfile") or die "Could not open '$logfile'\n";
 # Drop priviliges, if running as root
 if ($< == 0) {
     if (defined($ENV{SUDO_UID}) and defined($ENV{SUDO_GID})) {
         POSIX::setgid($ENV{SUDO_GID}) or error("Could not change gid");
         POSIX::setuid($ENV{SUDO_UID}) or error("Could not change uid");
+        defined($ENV{SUDO_USER}) and $login = $ENV{SUDO_USER};
     } else {
         # nobody/nogroup
         POSIX::setgid(65534) or error("Could not change gid");
@@ -79,8 +86,8 @@ if (-s $conf) {
     readconf($conf);
     if (defined($prefs{use_group})) {
         my ($name, $passwd, $gid, $members) = getgrnam($prefs{use_group});
-        if (not defined($members) or not grep { $_ eq getlogin() } split(/ /, $members)) {
-            error("Must be in '$prefs{use_group}' group. Aborting");
+        if (not defined($members) or not grep { $_ eq $login } split(/ /, $members)) {
+            error("'$login' must be in '$prefs{use_group}' group. Aborting");
         }
     }
 }
@@ -280,7 +287,6 @@ sub show_since {
 }
 
 sub do_last {
-    my $login = getlogin();
     open(LAST,"$last_exe -F -a $login|") or die "Unable to run $last_exe:$!\n";
     my $time = 0;
     while(my $line = <LAST>) {
