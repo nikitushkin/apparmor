@@ -6,11 +6,7 @@
 # Public License, Version 3 or later. See http://www.gnu.org/copyleft/gpl.html
 # for details.
 #
-# Script to run on a desktop system to get AppArmor notifications.
-#
-# TODO:
-#  - add rate limiting for same profile
-
+# Script to get AppArmor notifications.
 #
 # /etc/apparmor/notify.conf:
 # # set to 'yes' to enable AppArmor DENIED notifications
@@ -54,6 +50,12 @@ sub show_since;
 #
 # Main script
 #
+
+# be safe
+$ENV{PATH} = "/bin:/usr/bin";
+$ENV{SHELL} = "/bin/sh";
+$ENV{IFS} = "" if defined($ENV{IFS}) and $ENV{IFS} ne "";
+
 my $logfile = "/var/log/kern.log";
 -e "/var/run/auditd.pid" and $logfile = "/var/log/audit/audit.log";
 
@@ -142,11 +144,13 @@ sub readconf {
     close(CFG);
 }
 
-sub format_message {
+sub parse_message {
     my @params = @_;
     my $msg = $params[0];
 
     chomp($msg);
+    #debug("processing: $msg");
+
     my ($test) = LibAppArmorc::parse_record($msg);
 
     # Don't show logs before certain date
@@ -154,13 +158,13 @@ sub format_message {
     my $since = 0;
     if (defined($date) and $#params > 0 and $params[1] =~ /^[0-9]+$/) {
         $since = int($params[1]);
-        int($date) >= $since or return "";
+        int($date) >= $since or return ();
     }
 
     # ignore all but status and denied messages
     my $type = LibAppArmor::aa_log_record::swig_event_get($test);
 
-    $type == $LibAppArmor::AA_RECORD_DENIED or return "";
+    $type == $LibAppArmor::AA_RECORD_DENIED or return ();
 
     my $profile = LibAppArmor::aa_log_record::swig_profile_get($test);
     my $operation = LibAppArmor::aa_log_record::swig_operation_get($test);
@@ -170,13 +174,19 @@ sub format_message {
     my $sock_type = LibAppArmor::aa_log_record::swig_net_sock_type_get($test);
     LibAppArmorc::free_record($test);
 
+    return ($profile, $operation, $name, $denied, $family, $sock_type, $date);
+}
+
+sub format_message {
+    my ($profile, $operation, $name, $denied, $family, $sock_type, $date) = @_;
+
     my $formatted = "";
     defined($profile) and $formatted .= "Profile: $profile\n";
     defined($operation) and $formatted .= "Operation: $operation\n";
     defined($name) and $formatted .= "Name: $name\n";
     defined($denied) and $formatted .= "Denied: $denied\n";
     defined($family) and defined ($sock_type) and $formatted .= "Family: $family\nSocket type: $sock_type\n";
-    defined($date) and $since > 0 and $formatted .= "Date: ". scalar(localtime($date)) ."\n";
+    #defined($date) and $since > 0 and $formatted .= "Date: ". scalar(localtime($date)) ."\n";
     $formatted .= "Logfile: $logfile\n";
 
     return $formatted
@@ -195,27 +205,74 @@ sub format_stats {
 
 sub do_notify {
     my $first_run = 1;
-    for (;;) {
+    my %seen;
+    my $seconds = 5;
+    for (my $i=0;;$i++) {
         while(my $msg = <LOGFILE>) {
             $first_run and next;
 
-            my $m = format_message($msg);
+            my @attrib = parse_message($msg);
+            $#attrib > 0 or next;
+            my ($profile, $operation, $name, $denied, $family, $sock_type, $date) = @attrib;
+
+            my $k = "";
+            defined($profile) and $k .= "$profile|";
+            if (defined($name) and defined($denied)) {
+                $k .= "$name|$denied|";		# for file access, don't worry about operation
+            } else {
+                defined($operation) and $k .= "$operation|";
+                defined($name) and $k .= "$name|";
+                defined($denied) and $k .= "$denied|";
+                defined($family) and defined ($sock_type) and $k .= "$family|$sock_type|";
+            }
+
+            # don't display same message if seen in last 5 seconds
+            if (not defined($seen{$k})) {
+                $seen{$k} = time();
+            } else {
+                my $now = time();
+                $now - $seen{$k} < $seconds and next;
+                $seen{$k} = $now;
+            }
+
+            my $m = format_message(@attrib);
             $m ne "" or next;
+
             $m .= "For more information, please see:\n$url";
-            `"$notify_exe" -i gtk-dialog-warning -u critical -t 30000 -- "AppArmor Message" "$m"`;
+
+	    # 'system' uses execvp() so no shell metacharacters here.
+            # $notify_exe is an absolute path so execvp won't search PATH.
+            system "$notify_exe", "-i", "gtk-dialog-warning", "-u", "critical", "--", "AppArmor Message", "$m";
         }
         # from seek() in Programming Perl
         seek(LOGFILE, 0, 1);
         sleep(1);
         $first_run = 0;
+
+        # clean out the %seen database every 30 seconds
+        if ($i > 30) {
+            foreach my $k (keys %seen) {
+                my $now = time();
+                $now - $seen{$k} > $seconds and delete $seen{$k} and debug("deleted $k");
+            }
+            $i = 0;
+            debug("done purging");
+            foreach my $k (keys %seen) {
+                debug("remaining key: $k: $seen{$k}");
+            }
+        }
     }
 }
 
 sub show_since {
     my $count = 0;
     while(my $msg = <LOGFILE>) {
-        my $m = format_message($msg, $_[0]);
+        my @attrib = parse_message($msg, $_[0]);
+        $#attrib > 0 or next;
+
+        my $m = format_message(@attrib);
         $m ne "" or next;
+
         $opt_v and print "$m\n";
         $count++;
     }
