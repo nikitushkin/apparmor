@@ -1,7 +1,6 @@
-#!/bin/sh
-#
+#!/usr/bin/perl
 # Author: Jamie Strandboge <jamie@ubuntu.com>
-# Copyright (C) 2009 Canonical Ltd.
+# Copyright (C) 2009-2010 Canonical Ltd.
 #
 # This script is distributed under the terms and conditions of the GNU General
 # Public License, Version 3 or later. See http://www.gnu.org/copyleft/gpl.html
@@ -11,91 +10,275 @@
 #
 # TODO:
 #  - add rate limiting for same profile
-#  - make message prettier (eg, profile, file, access)
+
+#
+# /etc/apparmor/notify.conf:
+# # set to 'yes' to enable AppArmor DENIED notifications
+# show_notifications="yes"
+#
+# # only people in use_group can run this script
+# use_group="admin"
+#
+# $HOME/.apparmor_notify.conf can have:
+# # set to 'yes' to enable AppArmor DENIED notifications
+# show_notifications="yes"
 #
 
-set -e
+use strict;
+use warnings;
+no warnings qw( once );
 
-conf="/etc/apparmor/notify.conf"
-user_conf="$HOME/.apparmor_notify.conf"
+require LibAppArmor;
+require POSIX;
+require Time::Local;
 
-use_group=""
-if [ -s "$conf" ]; then
-    . "$conf"
-    if [ -n "$use_group" ] && id | grep -qv "($use_group)" ; then
-        echo "Must be in '$use_group' group. Aborting" >&2
-        exit 0
-    fi
-fi
+use vars qw($opt_p $opt_s $opt_l $opt_h $opt_v $opt_d);
+use Getopt::Std;
 
-notify_exe=`which notify-send` || true
-if [ -z "$notify_exe" ] || [ ! -x "$notify_exe" ]; then
-    echo "Could not find 'notify-send'. Please install libnotify-bin" >&2
-    exit 1
-fi
+my %prefs;
+my $conf = "/etc/apparmor/notify.conf";
+my $user_conf = "$ENV{HOME}/.apparmor_notify.conf";
+my $notify_exe = "/usr/bin/notify-send";
+my $last_exe = "/usr/bin/last";
+my $url = "https://wiki.ubuntu.com/DebuggingApparmor";
 
-show_notifications=""
-if [ -s "$user_conf" ]; then
-    . "$user_conf"
-    if [ "$show_notifications" != "yes" ]; then
-        echo "'show_notifications' disabled in '$user_conf'. Aborting" >&2
-        exit 0
-    fi
-else
-    tmp=`mktemp`
-    cat > "$tmp" << EOM
-# set to 'yes' to enable AppArmor DENIED notifications
-show_notifications="yes"
+sub readconf;
+sub error;
+sub debug;
+sub cleanup;
+sub usage;
+sub format_message;
+sub do_notify;
+sub show_since;
 
-# set to 'yes' to enable AppArmor STATUS notifications when using auditd
-show_status="no"
+#
+# Main script
+#
+my $logfile = "/var/log/kern.log";
+-e "/var/run/auditd.pid" and $logfile = "/var/log/audit/audit.log";
 
-# set to 'yes' to use gksudo to read /var/log/audit/audit.log when using
-# auditd
-use_gksudo="no"
-EOM
-    mv "$tmp" "$user_conf"
-fi
+$> == $< or die "Cannot be suid\n";
+$) == $( or die "Cannot be sgid\n";
 
-taillog() {
-    if pidof /sbin/auditd >/dev/null ; then
-        logfile="/var/log/audit/audit.log"
-        if [ "$use_gksudo" = "yes" ]; then
-            gksudo --message "The application 'apparmor-notify' requires permission to read '$logfile'" -- tail -f "$logfile"
-        elif [ -r "$logfile" ]; then
-            tail -f "$logfile"
-        else
-             echo "Could not read '$logfile'. Aborting" >&2
-             exit 1
-        fi
-    else
-        tail -f /var/log/kern.log
-    fi
+open (LOGFILE, "<$logfile") or die "Could not open '$logfile'\n";
+# Drop priviliges, if running as root
+if ($< == 0) {
+    if (defined($ENV{SUDO_UID}) and defined($ENV{SUDO_GID})) {
+        POSIX::setgid($ENV{SUDO_GID}) or error("Could not change gid");
+        POSIX::setuid($ENV{SUDO_UID}) or error("Could not change uid");
+    } else {
+        # nobody/nogroup
+        POSIX::setgid(65534) or error("Could not change gid");
+        POSIX::setuid(65534) or error("Could not change uid");
+    }
 }
 
-taillog | while read message; do
-    if echo "$message" | egrep -q -v '(denied|APPARMOR_STATUS)'; then
-        continue
-    fi
-    if echo "$message" | egrep -q -v 'audit\([0-9.:]+\).*' ; then
-        continue
-    fi
-    if echo "$message" | egrep 'APPARMOR_ALLOWED' ; then
-        continue
-    fi
+if (-s $conf) {
+    readconf($conf);
+    if (defined($prefs{use_group})) {
+        my ($name, $passwd, $gid, $members) = getgrnam($prefs{use_group});
+        if (not defined($members) or not grep { $_ eq getlogin() } split(/ /, $members)) {
+            error("Must be in '$prefs{use_group}' group. Aborting");
+        }
+    }
+}
 
-    type=""
-    if [ "$show_status" = "yes" ] && echo "$message" | grep -q "APPARMOR_STATUS" ; then
-        # status message
-        type="gtk-dialog-info"
-    elif echo "$message" | egrep -i 'denied' | egrep -q ' profile='; then
-        # denied message
-        type="gtk-dialog-warning"
-    else
-        # anything else, ignore
-        continue
-    fi
-    "$notify_exe" -i $type -u critical -t 30000 -- "AppArmor Message" "$message"
-    sleep 1
-done
+getopts('dhlpvs:');
+if ($opt_h) {
+    usage;
+    exitscript(0);
+} elsif ($opt_p) {
+    -x "$notify_exe" or error("Could not find '$notify_exe'. Please install libnotify-bin. Aborting");
+} elsif ($opt_l) {
+    -x "$last_exe" or error("Could not find '$last_exe'. Aborting");
+} elsif ($opt_s) {
+    $opt_s =~ /^[0-9]+$/ or error("-s requires a number");
+}
 
+if ($opt_p or $opt_l) {
+    if (-s $user_conf) {
+        readconf($user_conf);
+    }
+
+    if (defined($prefs{show_notifications}) and $prefs{show_notifications} ne "yes") {
+        error("'show_notifications' disabled in '$user_conf'. Aborting");
+    }
+}
+
+my $now = time();
+if ($opt_p) {
+    do_notify();
+} elsif ($opt_l) {
+    do_last();
+} elsif ($opt_s) {
+    do_show_messages($opt_s);
+} else {
+    usage;
+    exitscript(1);
+}
+
+exitscript(0);
+
+#
+# Subroutines
+#
+sub readconf {
+    my $cfg = $_[0];
+    -r $cfg or die "'$cfg' does not exist\n";
+
+    open (CFG, "<$cfg") or die "Could not open '$cfg'\n";
+    while (<CFG>) {
+        chomp;
+        s/#.*//;                # no comments
+        s/^\s+//;               # no leading white
+        s/\s+$//;               # no trailing white
+        next unless length;     # anything left?
+        my ($var, $value) = split(/\s*=\s*/, $_, 2);
+        if ($var eq "show_notifications" or $var eq "use_group") {
+            $value =~ s/^"(.*)"$/$1/g;
+            $prefs{$var} = $value;
+        }
+    }
+    close(CFG);
+}
+
+sub format_message {
+    my @params = @_;
+    my $msg = $params[0];
+
+    chomp($msg);
+    my ($test) = LibAppArmorc::parse_record($msg);
+
+    # Don't show logs before certain date
+    my $date = LibAppArmor::aa_log_record::swig_epoch_get($test);
+    my $since = 0;
+    if (defined($date) and $#params > 0 and $params[1] =~ /^[0-9]+$/) {
+        $since = int($params[1]);
+        int($date) >= $since or return "";
+    }
+
+    # ignore all but status and denied messages
+    my $type = LibAppArmor::aa_log_record::swig_event_get($test);
+
+    $type == $LibAppArmor::AA_RECORD_DENIED or return "";
+
+    my $profile = LibAppArmor::aa_log_record::swig_profile_get($test);
+    my $operation = LibAppArmor::aa_log_record::swig_operation_get($test);
+    my $name = LibAppArmor::aa_log_record::swig_name_get($test);
+    my $denied = LibAppArmor::aa_log_record::swig_denied_mask_get($test);
+    my $family = LibAppArmor::aa_log_record::swig_net_family_get($test);
+    my $sock_type = LibAppArmor::aa_log_record::swig_net_sock_type_get($test);
+    LibAppArmorc::free_record($test);
+
+    my $formatted = "";
+    defined($profile) and $formatted .= "Profile: $profile\n";
+    defined($operation) and $formatted .= "Operation: $operation\n";
+    defined($name) and $formatted .= "Name: $name\n";
+    defined($denied) and $formatted .= "Denied: $denied\n";
+    defined($family) and defined ($sock_type) and $formatted .= "Family: $family\nSocket type: $sock_type\n";
+    defined($date) and $since > 0 and $formatted .= "Date: ". scalar(localtime($date)) ."\n";
+    $formatted .= "Logfile: $logfile\n";
+
+    return $formatted
+}
+
+sub format_stats {
+    my $num = $_[0];
+    my $time = $_[1];
+    if ($num > 0) {
+        print "AppArmor denial";
+        $num > 1 and print "s";
+        print ": $num (since " . scalar(localtime($time)) . ")\n";
+        $opt_v and print "For more information, please see: $url\n";
+    }
+}
+
+sub do_notify {
+    my $first_run = 1;
+    for (;;) {
+        while(my $msg = <LOGFILE>) {
+            $first_run and next;
+
+            my $m = format_message($msg);
+            $m ne "" or next;
+            $m .= "For more information, please see:\n$url";
+            `"$notify_exe" -i gtk-dialog-warning -u critical -t 30000 -- "AppArmor Message" "$m"`;
+        }
+        # from seek() in Programming Perl
+        seek(LOGFILE, 0, 1);
+        sleep(1);
+        $first_run = 0;
+    }
+}
+
+sub show_since {
+    my $count = 0;
+    while(my $msg = <LOGFILE>) {
+        my $m = format_message($msg, $_[0]);
+        $m ne "" or next;
+        $opt_v and print "$m\n";
+        $count++;
+    }
+    return $count;
+}
+
+sub do_last {
+    my $login = getlogin();
+    open(LAST,"$last_exe -F -a $login|") or die "Unable to run $last_exe:$!\n";
+    my $time = 0;
+    while(my $line = <LAST>) {
+        debug("Checking '$line'");
+        $line =~ /^$login/ or next;
+        $line !~ /^$login\s+pts.*\s+:[0-9]+\.[0-9]+$/ or next; # ignore xterm and friends
+        my @entry = split(/\s+/, $line);
+        my ($hour, $min, $sec) = (split(/:/, $entry[5]))[0,1,2];
+        $time = Time::Local::timelocal($sec, $min, $hour, $entry[4], $entry[3], $entry[6]);
+        last;
+    }
+    close(LAST);
+    $time > 0 or error("Couldn't find last login");
+
+    format_stats(show_since($time), $time);
+}
+
+sub do_show_messages {
+    my $since = $now - (int($_[0]) * 60 * 60 * 24);
+    format_stats(show_since($since), $since);
+}
+
+sub error {
+    my $msg = $_[0];
+    print STDERR "apparmor-notify: $msg\n";
+    exitscript(1);
+}
+
+sub debug {
+    $opt_d or return;
+    my $msg = $_[0];
+    print STDERR "apparmor-notify DEBUG: $msg\n";
+}
+
+sub exitscript {
+    my $rc = $_[0];
+    close(LOGFILE);
+    exit $rc;
+}
+
+sub usage {
+    my $s = <<'EOF';
+USAGE: apparmor-notify [OPTIONS]
+Display AppArmor notifications or messages for DENIED entries.
+
+OPTIONS:
+  -p		poll AppArmor logs and display notifications
+  -l		display stats since last login
+  -s NUM	show stats for last NUM days
+  -v		show messages with stats
+  -h		display this help
+EOF
+    print $s;
+}
+
+#
+# end Subroutines
+#
