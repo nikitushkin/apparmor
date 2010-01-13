@@ -279,6 +279,11 @@ sub do_notify {
             $#attrib > 0 or next;
             my ($profile, $operation, $name, $denied, $family, $sock_type, $date) = @attrib;
 
+            # Rate limit messages by creating a hash whose keys are:
+            # - for files: profile|name|denied|
+            # - for everything else: $profile|$operation|$name|$denied|$family|$sock_type| (as available)
+            # The value for the key is a timestamp (epoch) and we won't show
+            # messages whose key has a timestamp from less than 5 seconds afo
             my $k = "";
             defined($profile) and $k .= "$profile|";
             if (defined($name) and defined($denied)) {
