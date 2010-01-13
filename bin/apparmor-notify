@@ -27,6 +27,7 @@ no warnings qw( once );
 require LibAppArmor;
 require POSIX;
 require Time::Local;
+require File::Temp;
 
 use vars qw($opt_p $opt_s $opt_l $opt_h $opt_v $opt_d);
 use Getopt::Std;
@@ -34,6 +35,7 @@ use Getopt::Std;
 my %prefs;
 my $conf = "/etc/apparmor/notify.conf";
 my $user_conf = "$ENV{HOME}/.apparmor_notify.conf";
+my $pidfile = "$ENV{HOME}/.apparmor_notify.pid";
 my $notify_exe = "/usr/bin/notify-send";
 my $last_exe = "/usr/bin/last";
 my $url = "https://wiki.ubuntu.com/DebuggingApparmor";
@@ -46,8 +48,9 @@ sub do_notify;
 sub show_since;
 sub do_last;
 sub do_show_messages;
-sub error;
-sub debug;
+sub _error;
+sub _warn;
+sub _debug;
 sub exitscript;
 sub usage;
 
@@ -66,28 +69,32 @@ my $logfile = "/var/log/kern.log";
 $> == $< or die "Cannot be suid\n";
 $) == $( or die "Cannot be sgid\n";
 
-my $login = getlogin();
+my $login;
 
 open (LOGFILE, "<$logfile") or die "Could not open '$logfile'\n";
 # Drop priviliges, if running as root
 if ($< == 0) {
+    $login = "root";
     if (defined($ENV{SUDO_UID}) and defined($ENV{SUDO_GID})) {
-        POSIX::setgid($ENV{SUDO_GID}) or error("Could not change gid");
-        POSIX::setuid($ENV{SUDO_UID}) or error("Could not change uid");
+        POSIX::setgid($ENV{SUDO_GID}) or _error("Could not change gid");
+        POSIX::setuid($ENV{SUDO_UID}) or _error("Could not change uid");
         defined($ENV{SUDO_USER}) and $login = $ENV{SUDO_USER};
     } else {
         # nobody/nogroup
-        POSIX::setgid(65534) or error("Could not change gid");
-        POSIX::setuid(65534) or error("Could not change uid");
+        POSIX::setgid(65534) or _error("Could not change gid");
+        POSIX::setuid(65534) or _error("Could not change uid");
     }
+} else {
+    $login = getlogin();
+    defined $login or $login = $ENV{'USER'};
 }
 
 if (-s $conf) {
     readconf($conf);
     if (defined($prefs{use_group})) {
         my ($name, $passwd, $gid, $members) = getgrnam($prefs{use_group});
-        if (not defined($members) or not grep { $_ eq $login } split(/ /, $members)) {
-            error("'$login' must be in '$prefs{use_group}' group. Aborting");
+        if (not defined($members) or not defined($login) or not grep { $_ eq $login } split(/ /, $members)) {
+            _error("'$login' must be in '$prefs{use_group}' group. Aborting");
         }
     }
 }
@@ -97,11 +104,11 @@ if ($opt_h) {
     usage;
     exitscript(0);
 } elsif ($opt_p) {
-    -x "$notify_exe" or error("Could not find '$notify_exe'. Please install libnotify-bin. Aborting");
+    -x "$notify_exe" or _error("Could not find '$notify_exe'. Please install libnotify-bin. Aborting");
 } elsif ($opt_l) {
-    -x "$last_exe" or error("Could not find '$last_exe'. Aborting");
+    -x "$last_exe" or _error("Could not find '$last_exe'. Aborting");
 } elsif ($opt_s) {
-    $opt_s =~ /^[0-9]+$/ or error("-s requires a number");
+    $opt_s =~ /^[0-9]+$/ or _error("-s requires a number");
 }
 
 if ($opt_p or $opt_l) {
@@ -110,9 +117,10 @@ if ($opt_p or $opt_l) {
     }
 
     if (defined($prefs{show_notifications}) and $prefs{show_notifications} ne "yes") {
-        error("'show_notifications' disabled in '$user_conf'. Aborting");
+        _error("'show_notifications' disabled in '$user_conf'. Aborting");
     }
 }
+
 
 my $now = time();
 if ($opt_p) {
@@ -156,7 +164,7 @@ sub parse_message {
     my $msg = $params[0];
 
     chomp($msg);
-    #debug("processing: $msg");
+    #_debug("processing: $msg");
 
     my ($test) = LibAppArmorc::parse_record($msg);
 
@@ -214,7 +222,51 @@ sub do_notify {
     my $first_run = 1;
     my %seen;
     my $seconds = 5;
-    for (my $i=0;;$i++) {
+    our $time_to_die = 0;
+
+    # Handle pidfile
+    if (-e $pidfile) {
+        # read it and kill the pid
+        open (PIDFILE, "<$pidfile") or die "Could not open '$pidfile'\n";
+        while (<PIDFILE>) {
+            chomp;
+            if (/^\d+/) {
+                my $pid = $_;
+                _warn("Killing stale pid '$pid'");
+                kill 15, ($pid);
+            }
+            last;
+        }
+        close(PIDFILE);
+        unlink($pidfile);
+    }
+    print "Starting apparmor-notify\n";
+
+    # Daemonize, but not if in debug mode
+    if (not $opt_d) {
+        chdir('/') or die "Can't chdir to /: $!";
+        umask 0;
+        open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+        open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
+        open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
+        my $pid = fork();
+        exit if $pid;
+        die "Couldn't fork: $!" unless defined($pid);
+        POSIX::setsid() or die "Can't start a new session: $!";
+    }
+
+    my $fd = POSIX::open($pidfile, &POSIX::O_CREAT|&POSIX::O_EXCL|&POSIX::O_WRONLY, 0644);
+    my $buf = "$$";
+    POSIX::write($fd, $buf, length($buf));
+    POSIX::close($fd);
+
+    sub signal_handler {
+        $time_to_die = 1;
+    }
+    $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signal_handler;
+    $SIG{'PIPE'} = 'IGNORE';
+
+    for (my $i=0; $time_to_die == 0; $i++) {
         while(my $msg = <LOGFILE>) {
             $first_run and next;
 
@@ -250,6 +302,12 @@ sub do_notify {
 	    # 'system' uses execvp() so no shell metacharacters here.
             # $notify_exe is an absolute path so execvp won't search PATH.
             system "$notify_exe", "-i", "gtk-dialog-warning", "-u", "critical", "--", "AppArmor Message", "$m";
+            my $exit_code = $? >> 8;
+            if ($exit_code != 0) {
+                _warn("'$notify_exe' exited with '$exit_code'");
+                $time_to_die = 1;
+                last;
+            }
         }
         # from seek() in Programming Perl
         seek(LOGFILE, 0, 1);
@@ -260,15 +318,17 @@ sub do_notify {
         if ($i > 30) {
             foreach my $k (keys %seen) {
                 my $now = time();
-                $now - $seen{$k} > $seconds and delete $seen{$k} and debug("deleted $k");
+                $now - $seen{$k} > $seconds and delete $seen{$k} and _debug("deleted $k");
             }
             $i = 0;
-            debug("done purging");
+            _debug("done purging");
             foreach my $k (keys %seen) {
-                debug("remaining key: $k: $seen{$k}");
+                _debug("remaining key: $k: $seen{$k}");
             }
         }
     }
+    unlink($pidfile);
+    print STDERR "Stopping apparmor-notify\n";
 }
 
 sub show_since {
@@ -290,7 +350,7 @@ sub do_last {
     open(LAST,"$last_exe -F -a $login|") or die "Unable to run $last_exe:$!\n";
     my $time = 0;
     while(my $line = <LAST>) {
-        debug("Checking '$line'");
+        _debug("Checking '$line'");
         $line =~ /^$login/ or next;
         $line !~ /^$login\s+pts.*\s+:[0-9]+\.[0-9]+$/ or next; # ignore xterm and friends
         my @entry = split(/\s+/, $line);
@@ -299,7 +359,7 @@ sub do_last {
         last;
     }
     close(LAST);
-    $time > 0 or error("Couldn't find last login");
+    $time > 0 or _error("Couldn't find last login");
 
     format_stats(show_since($time), $time);
 }
@@ -309,16 +369,20 @@ sub do_show_messages {
     format_stats(show_since($since), $since);
 }
 
-sub error {
+sub _warn {
     my $msg = $_[0];
-    print STDERR "apparmor-notify: $msg\n";
+    print STDERR "apparmor-notify: WARN: $msg\n";
+}
+sub _error {
+    my $msg = $_[0];
+    print STDERR "apparmor-notify: ERROR: $msg\n";
     exitscript(1);
 }
 
-sub debug {
+sub _debug {
     $opt_d or return;
     my $msg = $_[0];
-    print STDERR "apparmor-notify DEBUG: $msg\n";
+    print STDERR "apparmor-notify: DEBUG: $msg\n";
 }
 
 sub exitscript {
