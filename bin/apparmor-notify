@@ -27,7 +27,6 @@ no warnings qw( once );
 require LibAppArmor;
 require POSIX;
 require Time::Local;
-require File::Temp;
 
 use vars qw($opt_p $opt_s $opt_l $opt_h $opt_v $opt_d);
 use Getopt::Std;
@@ -35,15 +34,18 @@ use Getopt::Std;
 my %prefs;
 my $conf = "/etc/apparmor/notify.conf";
 my $user_conf = "$ENV{HOME}/.apparmor_notify.conf";
-my $pidfile = "$ENV{HOME}/.apparmor_notify.pid";
 my $notify_exe = "/usr/bin/notify-send";
 my $last_exe = "/usr/bin/last";
+my $ps_exe = "/bin/ps";
 my $url = "https://wiki.ubuntu.com/DebuggingApparmor";
+my $nobody_user = "nobody";
+my $nobody_group = "nogroup";
 
 sub readconf;
 sub parse_message;
 sub format_message;
 sub format_stats;
+sub kill_running_daemons;
 sub do_notify;
 sub show_since;
 sub do_last;
@@ -81,8 +83,8 @@ if ($< == 0) {
         defined($ENV{SUDO_USER}) and $login = $ENV{SUDO_USER};
     } else {
         # nobody/nogroup
-        POSIX::setgid(65534) or _error("Could not change gid");
-        POSIX::setuid(65534) or _error("Could not change uid");
+        POSIX::setgid(scalar(getpwnam($nobody_group))) or _error("Could not change gid to '$$nobody_group'");
+        POSIX::setuid(scalar(getpwnam($nobody_user))) or _error("Could not change uid to '$nobody_user'");
     }
 } else {
     $login = getlogin();
@@ -117,7 +119,8 @@ if ($opt_p or $opt_l) {
     }
 
     if (defined($prefs{show_notifications}) and $prefs{show_notifications} ne "yes") {
-        _error("'show_notifications' disabled in '$user_conf'. Aborting");
+        _debug("'show_notifications' is disabled. Exiting");
+        exitscript(0);
     }
 }
 
@@ -218,29 +221,36 @@ sub format_stats {
     }
 }
 
+sub kill_running_daemons {
+    # Look for other daemon instances of this script and kill them. This
+    # can happen on logout and back in (in which case $notify_exe fails
+    # anyway). 'ps xw' should output something like:
+    #  9987 ?        Ss     0:01 /usr/bin/perl ./bin/apparmor-notify -p
+    # 10170 ?        Ss     0:00 /usr/bin/perl ./bin/apparmor-notify -p
+    open(PS,"$ps_exe xw|") or die "Unable to run '$ps_exe':$!\n";
+    while(<PS>) {
+        chomp;
+        /apparmor-notify -p$/ or next;
+        s/^\s+//;
+        my @line = split(/\s+/, $_);
+        if ($line[5] =~ /apparmor-notify$/ and $line[6] eq "-p") {
+            if ($line[0] != $$) {
+                _warn("killing old daemon '$line[0]'");
+                kill 15, ($line[0]);
+            }
+        }
+    }
+    close(PS);
+}
+
 sub do_notify {
     my $first_run = 1;
     my %seen;
     my $seconds = 5;
     our $time_to_die = 0;
 
-    # Handle pidfile
-    if (-e $pidfile) {
-        # read it and kill the pid
-        open (PIDFILE, "<$pidfile") or die "Could not open '$pidfile'\n";
-        while (<PIDFILE>) {
-            chomp;
-            if (/^\d+/) {
-                my $pid = $_;
-                _warn("Killing stale pid '$pid'");
-                kill 15, ($pid);
-            }
-            last;
-        }
-        close(PIDFILE);
-        unlink($pidfile);
-    }
     print "Starting apparmor-notify\n";
+    kill_running_daemons();
 
     # Daemonize, but not if in debug mode
     if (not $opt_d) {
@@ -254,11 +264,6 @@ sub do_notify {
         die "Couldn't fork: $!" unless defined($pid);
         POSIX::setsid() or die "Can't start a new session: $!";
     }
-
-    my $fd = POSIX::open($pidfile, &POSIX::O_CREAT|&POSIX::O_EXCL|&POSIX::O_WRONLY, 0644);
-    my $buf = "$$";
-    POSIX::write($fd, $buf, length($buf));
-    POSIX::close($fd);
 
     sub signal_handler {
         $time_to_die = 1;
@@ -327,7 +332,6 @@ sub do_notify {
             }
         }
     }
-    unlink($pidfile);
     print STDERR "Stopping apparmor-notify\n";
 }
 
