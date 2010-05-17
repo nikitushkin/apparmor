@@ -1,0 +1,150 @@
+# Last Modified: Sat May 15 22:54:24 2010
+# Author: Jamie Strandboge <jamie@canonical.com>
+#include <tunables/global>
+
+/usr/lib/chromium-browser/chromium-browser {
+
+  # shared (verify)
+  #include <abstractions/audio>
+  #include <abstractions/base>
+  #include <abstractions/cups-client>
+  #include <abstractions/dbus>
+  #include <abstractions/fonts>
+  #include <abstractions/freedesktop.org>
+  #include <abstractions/gnome>
+  #include <abstractions/kde>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/X>
+
+  network inet stream,
+  network inet6 stream,
+  @{PROC}/[0-9]*/net/if_inet6 r,
+  @{PROC}/[0-9]*/net/ipv6_route r,
+
+  @{PROC}/[0-9]*/fd/ r,
+  @{PROC}/filesystems r,
+  @{PROC}/ r,
+  @{PROC}/[0-9]*/cmdline r,
+  @{PROC}/[0-9]*/stat r,
+  @{PROC}/[0-9]*/status r,
+
+  # allow access to documentation and other files the user may want to look
+  # at in /usr
+  /usr/ r,
+  /usr/** r,
+
+  # so browsing directories works
+  / r,
+  /**/ r,
+
+  # allow read and write to all user's files, except explicitly denied ones
+  @{HOME}/ r,
+  @{HOME}/** r,
+  owner @{HOME}/** w,
+  owner @{HOME}/Desktop/** r,
+
+  # removable media and filesystems (abstract out)
+  /media/** r,
+  /mnt/** r,
+  /srv/** r,
+  owner /media/** w,
+  owner /mnt/** w,
+  owner /srv/** w,
+
+  # comment this out if using gpg plugin/addons
+  audit deny @{HOME}/.gnupg/** mrwkl,
+
+  #include <abstractions/private-files>
+  audit deny @{HOME}/.ssh/** mrwkl,
+  audit deny @{HOME}/.gnome2_private/** mrwkl,
+
+  # helpers
+  /bin/dash ix,
+  /bin/ps Ux,
+  /bin/grep ix,
+
+  # end shared
+
+  # chromium mmaps all kinds of things for speed. Consider adding to the
+  # profile -- but shouldn't these just be 'r' and not mmap as executable?
+  /etc/passwd m,
+  /usr/share/fonts/truetype/**/*.tt[cf] m,
+  /usr/share/fonts/**/*.pfb m,
+  /usr/share/mime/mime.cache m,
+  /usr/share/icons/**/*.cache m,
+  owner /dev/shm/pulse-shm* m,
+  owner @{HOME}/.local/share/mime/mime.cache m,
+
+  @{PROC}/sys/kernel/shmmax r,
+  owner /dev/shm/org.chromium.* mrw,
+
+  /usr/lib/chromium-browser/*.pak mr,
+  /usr/lib/chromium-browser/locales/* mr,
+
+  # plugins
+  /usr/lib/jvm/java-6-openjdk/jre/lib/*/IcedTeaPlugin.so m,
+  /usr/lib/chromium-browser/plugins/flashplugin-alternative.so m,
+
+  # helpers
+  # nice, can just use this to allow access to Gnome's preferred applications
+  /usr/bin/xdg-open ix,
+  /usr/bin/gnome-open Ux,
+  # TODO: kde, xfce
+
+  # for importing
+  @{PROC}/[0-9]*/oom_adj w,
+  /usr/lib/chromium-browser/xdg-settings Ux,
+  /etc/firefox/profile/bookmarks.html r,
+  owner @{HOME}/.mozilla/ r,
+  owner @{HOME}/.mozilla/** rk,
+
+  # noisy
+  deny /usr/lib/chromium-browser/** w,  
+
+  owner @{HOME}/.cache/chromium/ rw,
+  owner @{HOME}/.cache/chromium/** mrw,
+  owner @{HOME}/.config/chromium/ rw,
+  owner @{HOME}/.config/chromium/** rwk,
+  owner @{HOME}/.pki/nssdb/*.db k,
+
+  # transitions to ourself and our sandbox
+  /usr/lib/chromium-browser/chromium-browser ix,
+  /usr/lib/chromium-browser/chromium-browser-sandbox cx -> chromium_browser_sandbox,
+
+  profile chromium_browser_sandbox {
+    # try to be fanatical since it is setuid root (in lieu of base abstraction):
+    /lib/libgcc_s.so* mr,
+    /lib{,32,64}/libm-*.so* mr,
+    /lib{,32,64}/libpthread-*.so* mr,
+    /lib{,32,64}/libc-*.so* mr,
+    /lib/tls/*/{cmov,nosegneg}/libm-*.so* mr,
+    /lib/tls/*/{cmov,nosegneg}/libpthread-*.so* mr,
+    /lib/tls/*/{cmov,nosegneg}/libc-*.so* mr,
+    /usr/lib/libstdc++.so* mr,
+    /etc/ld.so.cache r,
+
+    # required for dropping into PID namespace. Is this worth it anymore?
+    capability sys_admin,
+
+    # all of these are for sanely dropping from root and chrooting
+    capability chown,
+    capability fsetid,
+    capability setgid,
+    capability setuid,
+    capability dac_override,
+    capability sys_chroot,
+
+    # no fun. why is this needed? (probably for its kid...)
+    capability sys_ptrace,
+
+    @{PROC}/ r,
+    @{PROC}/[0-9]*/fd/ r,
+    @{PROC}/[0-9]*/oom_adj w,
+
+    /usr/bin/chromium-browser r,
+    /usr/lib/chromium-browser/chromium-browser Px,
+
+    owner /tmp/** rw,
+  }
+}
