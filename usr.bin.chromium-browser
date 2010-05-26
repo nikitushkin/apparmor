@@ -100,13 +100,19 @@
   owner @{HOME}/.mozilla/** rk,
 
   # noisy
-  deny /usr/lib/chromium-browser/** w,  
+  deny /usr/lib/chromium-browser/** w,
+
+  owner @{HOME}/.pki/nssdb/*.db k,
 
   owner @{HOME}/.cache/chromium/ rw,
-  owner @{HOME}/.cache/chromium/** mrw,
+  owner @{HOME}/.cache/chromium/** rw,
+  owner @{HOME}/.cache/chromium/Cache/* m,
+
   owner @{HOME}/.config/chromium/ rw,
   owner @{HOME}/.config/chromium/** rwk,
-  owner @{HOME}/.pki/nssdb/*.db k,
+  owner @{HOME}/.config/chromium/**/Cache/* m,
+  owner @{HOME}/.config/chromium/Dictionaries/*.bdic m,
+  owner @{HOME}/.config/chromium/**/Dictionaries/*.bdic m,
 
   # transitions to ourself and our sandbox
   /usr/lib/chromium-browser/chromium-browser ix,
