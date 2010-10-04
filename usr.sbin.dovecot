@@ -26,6 +26,7 @@
   /usr/lib/dovecot/managesieve-login Pxmr,
   /usr/lib/dovecot/ssl-build-param ixr,
   /usr/sbin/dovecot mr,
+  /var/lib/dovecot/ w,
   /var/lib/dovecot/* krw,
   /var/run/dovecot/ rw,
   /var/run/dovecot/** rw,
