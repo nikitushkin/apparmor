@@ -23,7 +23,7 @@
   /usr/share/evolution-data-server-*/** r,
   /usr/share/evolution/** r,
   /usr/share/gtkhtml-*/** r,
-  /usr/bin/evolution mr, # needed for killev
+  /usr/bin/evolution mrix,
 
   # Helper applications
   /usr/lib/evolution/*/killev Cx -> killev,
