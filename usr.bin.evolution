@@ -1,0 +1,97 @@
+# vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
+# TODO:
+# - imports
+# - backup/restore
+# - spam filtering with bogofilter
+# - dbus mediation for evolution-data-server
+# - lot's more (evolution is huge)
+
+#include <tunables/global>
+
+/usr/bin/evolution {
+  #include <abstractions/audio>
+  #include <abstractions/base>
+  #include <abstractions/fonts>
+  #include <abstractions/freedesktop.org>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/python>
+  #include <abstractions/X>
+
+  #include <abstractions/ubuntu-browsers>
+
+  /etc/timezone r,
+  /usr/include/python2.7/pyconfig.h r,
+  /usr/lib/evolution/*/killev Cx -> killev,
+  /usr/share/evolution-data-server-*/** r,
+  /usr/share/evolution/** r,
+  /usr/share/gtkhtml-*/** r,
+  /usr/bin/evolution mr, # needed for killev
+
+  owner @{HOME}/.gnome2_private/Evolution rw,
+  owner @{HOME}/.camel_certs/ rw,
+  owner @{HOME}/.camel_certs/* rw,
+
+  # Old evolution storage locations
+  owner @{HOME}/.evolution/ rw,
+  owner @{HOME}/.evolution/** rwlk,
+  owner @{HOME}/.gnome2/accels/evolution rw,
+
+  # New evolution storage locations
+  owner @{HOME}/.cache/evolution/ rw,
+  owner @{HOME}/.cache/evolution/** rwkl,
+  owner @{HOME}/.config/evolution/ rw,
+  owner @{HOME}/.config/evolution/** rwkl,
+  owner @{HOME}/.local/share/evolution/ rw,
+  owner @{HOME}/.local/share/evolution/** rwkl,
+
+  # Default profile allows saves to ~/Downloads and attachments from ~/Public
+  owner @{HOME}/ r,
+  owner @{HOME}/Public/ r,
+  owner @{HOME}/Public/* r,
+  owner @{HOME}/Downloads/ r,
+  owner @{HOME}/Downloads/* rw,
+
+  # Possibly in abstractions?
+  owner @{HOME}/.goutputstream-* rw,
+
+  /usr/share/enchant/** r,
+  owner @{HOME}/.config/enchant/ r,
+  owner @{HOME}/.config/enchant/** r,
+  owner @{HOME}/.config/enchant/*.{dic,exc} wk,
+  /usr/share/{hunspell,myspell}/ r,
+  /usr/share/{hunspell,myspell}/** r,
+
+  owner @{HOME}/.config/ibus/ r,
+  owner @{HOME}/.config/ibus/** rwk,
+
+  owner @{HOME}/.pki/ rw,
+  owner @{HOME}/.pki/nssdb/ rw,
+  owner @{HOME}/.pki/nssdb/* rwk,
+
+  /usr/share/xml/iso-codes/* r,
+
+  /var/lib/dbus/machine-id r,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.evolution>
+
+profile killev {
+    #include <abstractions/base>
+    #include <abstractions/gnome>
+    #include <abstractions/nameservice>
+
+    capability sys_ptrace,
+
+    /bin/dash rix,
+    @{PROC}/*/cmdline r,
+    @{PROC}/*/stat r,
+    deny @{PROC}/*/fd/ r,
+    /usr/bin/killall rix,
+
+    /usr/bin/evolution Px,
+
+    owner @{HOME}/.config/evolution/.running r,
+  }
+}
