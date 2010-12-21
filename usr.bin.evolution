@@ -22,12 +22,17 @@
   #include <abstractions/ubuntu-browsers>
 
   /etc/timezone r,
+  deny @{PROC}/*/fd/ r, # investigate
   /usr/include/python2.7/pyconfig.h r,
-  /usr/lib/evolution/*/killev Cx -> killev,
   /usr/share/evolution-data-server-*/** r,
   /usr/share/evolution/** r,
   /usr/share/gtkhtml-*/** r,
   /usr/bin/evolution mr, # needed for killev
+
+  # Helper applications
+  /usr/lib/evolution/*/killev Cx -> killev,
+  /usr/bin/gpg Cx -> gpg,
+  /usr/bin/evince PUx,
 
   owner @{HOME}/.gnome2_private/Evolution rw,
   owner @{HOME}/.camel_certs/ rw,
@@ -56,6 +61,13 @@
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
 
+  /usr/share/applications/mimeinfo.cache r,
+  /usr/share/applications/*.desktop r,
+  owner @{HOME}/.local/share/applications/defaults.list r,
+  owner @{HOME}/.local/share/applications/mimeinfo.cache r,
+  owner @{HOME}/.local/share/applications/mimeapps.list r,
+  owner @{HOME}/.local/share/applications/*.desktop r,
+
   /usr/share/enchant/** r,
   owner @{HOME}/.config/enchant/ r,
   owner @{HOME}/.config/enchant/** r,
@@ -74,10 +86,12 @@
 
   /var/lib/dbus/machine-id r,
 
+  owner @{HOME}/.local/share/recently-used.xbel* rw,
+
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.evolution>
 
-profile killev {
+  profile killev {
     #include <abstractions/base>
     #include <abstractions/gnome>
     #include <abstractions/nameservice>
@@ -93,5 +107,19 @@ profile killev {
     /usr/bin/evolution Px,
 
     owner @{HOME}/.config/evolution/.running r,
+  }
+
+  profile gpg {
+    #include <abstractions/base>
+    /usr/bin/gpg mr,
+    owner @{HOME}/.gnupg r,
+    owner @{HOME}/.gnupg/gpg.conf r,
+    owner @{HOME}/.gnupg/random_seed rwk,
+    owner @{HOME}/.gnupg/pubring.gpg r,
+    owner @{HOME}/.gnupg/secring.gpg r,
+    owner @{HOME}/.gnupg/trustdb.gpg rw,
+    owner @{HOME}/.gnupg/.#*[0-9] rw,
+
+    owner /tmp/evolution-pgp.* rw,
   }
 }
