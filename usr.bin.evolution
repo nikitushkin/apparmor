@@ -57,7 +57,7 @@
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
 
-  owner @{HOME}/.local/share/gvfs-metadata/home r, # investigate. might be ok to just 'deny'
+  owner @{HOME}/.local/share/gvfs-metadata/home* r, # investigate. might be ok to just 'deny'
 
   /usr/share/applications/mimeinfo.cache r,
   /usr/share/applications/*.desktop r,
