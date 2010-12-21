@@ -21,6 +21,10 @@
   /usr/lib/empathy/empathy-av ix,
   /usr/bin/empathy-debugger Cx -> empathy_debugger,
 
+  # For opening URLs
+  #include <abstractions/ubuntu-browsers>
+  deny @{PROC}/[0-9]*/fd/ r, # investigate
+
   /usr/share/adium/** r,
   /usr/share/empathy/** r,
   /usr/share/GConf/gsettings/empathy.convert r,
@@ -57,10 +61,11 @@
   owner @{HOME}/.config/ibus/** rwk,
 
   /usr/share/applications/mimeinfo.cache r,
+  /usr/share/applications/*.desktop r,
   owner @{HOME}/.local/share/applications/defaults.list r,
   owner @{HOME}/.local/share/applications/mimeinfo.cache r,
   owner @{HOME}/.local/share/applications/mimeapps.list r,
-  
+
   /usr/share/enchant/** r,
   owner @{HOME}/.config/enchant/ r,
   owner @{HOME}/.config/enchant/** r,
