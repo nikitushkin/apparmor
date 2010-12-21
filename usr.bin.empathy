@@ -6,14 +6,10 @@
 
 #include <tunables/global>
 /usr/bin/empathy {
-  #include <abstractions/base>
   #include <abstractions/nameservice>
   #include <abstractions/audio>
-  #include <abstractions/fonts>
-  #include <abstractions/freedesktop.org>
   #include <abstractions/gnome>
   #include <abstractions/launchpad-integration>
-  #include <abstractions/X>
 
   # Helper applications
   /usr/bin/empathy-accounts ix,

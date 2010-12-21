@@ -10,18 +10,13 @@
 /usr/bin/pidgin {
 	#include <abstractions/audio>
 	#include <abstractions/aspell>
-	#include <abstractions/base>
 	#include <abstractions/bash>
 	#include <abstractions/consoles>
 	#include <abstractions/dbus>
-	#include <abstractions/fonts>
-	#include <abstractions/freedesktop.org>
 	#include <abstractions/gnome>
 	#include <abstractions/nameservice>
 	#include <abstractions/launchpad-integration>
 	#include <abstractions/user-download>
-	#include <abstractions/user-tmp>
-	#include <abstractions/X>
 
 	capability sys_ptrace,
 

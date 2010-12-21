@@ -11,13 +11,9 @@
 
 /usr/bin/evolution {
   #include <abstractions/audio>
-  #include <abstractions/base>
-  #include <abstractions/fonts>
-  #include <abstractions/freedesktop.org>
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
   #include <abstractions/python>
-  #include <abstractions/X>
 
   #include <abstractions/ubuntu-browsers>
 
@@ -76,7 +72,8 @@
   /usr/share/{hunspell,myspell}/** r,
 
   owner @{HOME}/.config/ibus/ r,
-  owner @{HOME}/.config/ibus/** rwk,
+  owner @{HOME}/.config/ibus/bus/ rw,
+  owner @{HOME}/.config/ibus/bus/* rw,
 
   owner @{HOME}/.pki/ rw,
   owner @{HOME}/.pki/nssdb/ rw,
@@ -85,6 +82,8 @@
   /usr/share/xml/iso-codes/* r,
 
   /var/lib/dbus/machine-id r,
+
+  /usr/share/libthai/thbrk.tri r,
 
   owner @{HOME}/.local/share/recently-used.xbel* rw,
 
