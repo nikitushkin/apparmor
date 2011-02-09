@@ -14,9 +14,13 @@
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
   #include <abstractions/python>
+  #include <abstractions/ibus>
+  #include <abstractions/enchant>
 
   #include <abstractions/ubuntu-browsers>
 
+  / r,
+  deny /boot/{vmlinuz,initrd}* r,
   /etc/timezone r,
   deny @{PROC}/*/fd/ r, # investigate
   /usr/include/python2.7/pyconfig.h r,
@@ -57,25 +61,7 @@
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
 
-  owner @{HOME}/.local/share/gvfs-metadata/home* r, # investigate. might be ok to just 'deny'
-
-  /usr/share/applications/mimeinfo.cache r,
-  /usr/share/applications/*.desktop r,
-  owner @{HOME}/.local/share/applications/defaults.list r,
-  owner @{HOME}/.local/share/applications/mimeinfo.cache r,
-  owner @{HOME}/.local/share/applications/mimeapps.list r,
-  owner @{HOME}/.local/share/applications/*.desktop r,
-
-  /usr/share/enchant/** r,
-  owner @{HOME}/.config/enchant/ r,
-  owner @{HOME}/.config/enchant/** r,
-  owner @{HOME}/.config/enchant/*.{dic,exc} wk,
-  /usr/share/{hunspell,myspell}/ r,
-  /usr/share/{hunspell,myspell}/** r,
-
-  owner @{HOME}/.config/ibus/ r,
-  owner @{HOME}/.config/ibus/bus/ rw,
-  owner @{HOME}/.config/ibus/bus/* rw,
+  owner @{HOME}/.local/share/gvfs-metadata/home* r,
 
   owner @{HOME}/.pki/ rw,
   owner @{HOME}/.pki/nssdb/ rw,
@@ -86,8 +72,6 @@
   /var/lib/dbus/machine-id r,
 
   /usr/share/libthai/thbrk.tri r,
-
-  owner @{HOME}/.local/share/recently-used.xbel* rw,
 
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.evolution>
@@ -100,6 +84,7 @@
     capability sys_ptrace,
 
     /bin/dash rix,
+    @{PROC}/ r,
     @{PROC}/*/cmdline r,
     @{PROC}/*/stat r,
     deny @{PROC}/*/fd/ r,
@@ -119,6 +104,7 @@
     owner @{HOME}/.gnupg/pubring.gpg r,
     owner @{HOME}/.gnupg/secring.gpg r,
     owner @{HOME}/.gnupg/trustdb.gpg rw,
+    owner @{HOME}/.gnupg/*.gpg.{lock,tmp} wl,
     owner @{HOME}/.gnupg/.#*[0-9] rw,
 
     owner /tmp/evolution-pgp.* rw,
