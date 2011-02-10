@@ -1,0 +1,18 @@
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+/usr/bin/totem {
+  #include <abstractions/audio>
+  #include <abstractions/python>
+  #include <abstractions/totem>
+
+  # Maybe in an abstraction?
+  /usr/include/**/pyconfig.h r,
+
+  # Allow read and write on anything in @{HOME}. Lenient, but
+  # private-files-strict is in effect.
+  #include <abstractions/private-files-strict>
+  owner @{HOME}/** rw,
+}
+
