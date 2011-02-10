@@ -1,4 +1,6 @@
-# Last Modified: Wed Feb  9 08:08:55 2011
+# vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
+
 #include <tunables/global>
 
 # http://gfontview.sourceforge.net/features.html
@@ -7,7 +9,6 @@
 /usr/bin/gnome-thumbnail-font {
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
-  #include <abstractions/private-files-strict>
 
   /**/ r,
 
@@ -16,4 +17,8 @@
   /**.[pP][fF][bB]{,.gz} r,
   /**.[pP][cC][fF]{,.gz} r,
   /**.[pP][sS]{,.gz} r,
+
+  # Not needed by nautilus, but maybe other applications
+  #include <abstractions/private-files-strict>
+  owner /**.[pP][nN][gG] w,
 }

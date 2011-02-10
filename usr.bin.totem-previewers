@@ -1,4 +1,5 @@
 # vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
 
 #include <tunables/global>
 

@@ -1,4 +1,5 @@
-# Last Modified: Wed Feb 11 10:57:51 2011
+# vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
 
 # Description: Limit executable access and reasonable read access. A look at
 # the gconf schema files for totem-video-thumbnailer reveals at least the
