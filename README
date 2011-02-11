@@ -1,0 +1,46 @@
+------------
+Introduction
+------------
+This repository contains AppArmor profiles that are currently in
+development. Once a profile reaches maturity, it gets removed from this
+repository and moved into a distribution's official packaging.
+
+
+----------------
+Directory Layout
+----------------
+Each distribution gets it's own top-level directory, which contains a
+subdirectory for each release. Typically, when a new release opens for
+development, a new directory will be created and profiles from the previous
+release will be copied over.
+
+
+--------------
+Using profiles
+--------------
+AppArmor profiles can be copied out of this repository into the
+/etc/apparmor.d directory. Some profiles may include extra files and
+abstractions that need to be copied over also. Once the files are in
+place, the profile will need to be reloaded.
+
+For example, on Ubuntu:
+sudo apparmor_parser -r /etc/apparmor.d/profile.name
+
+For more information, please see the appropriate documentation for your
+specific distribution here:
+https://apparmor.wiki.kernel.org/index.php/Main_Page#Documentation
+
+
+-----------------
+How to contribute
+-----------------
+Contributions are welcome!
+
+Patches to this repository can be contributed by posting them to the
+AppArmor mailing list (https://lists.ubuntu.com/mailman/listinfo/apparmor).
+
+Please read through the commit policy before sending patches:
+https://apparmor.wiki.kernel.org/index.php/CommitPolicy
+
+
+
