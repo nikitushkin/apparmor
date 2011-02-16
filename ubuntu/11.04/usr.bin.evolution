@@ -31,8 +31,11 @@
 
   # Helper applications
   /usr/lib/evolution/*/killev Cx -> killev,
+  /usr/lib/evolution/*/evolution-backup Cx -> backup,
   /usr/bin/gpg Cx -> gpg,
   /usr/bin/evince PUx,
+  /usr/bin/seahorse-tool ix,
+  /usr/share/seahorse-plugins/** r,
 
   owner @{HOME}/.gnome2_private/Evolution rw,
   owner @{HOME}/.camel_certs/ rw,
@@ -60,6 +63,7 @@
 
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
+  owner @{HOME}/.thumbnails/** r,
 
   owner @{HOME}/.local/share/gvfs-metadata/home* r,
 
@@ -108,5 +112,40 @@
     owner @{HOME}/.gnupg/.#*[0-9] rw,
 
     owner /tmp/evolution-pgp.* rw,
+  }
+
+  profile backup {
+    #include <abstractions/base>
+    #include <abstractions/gnome>
+    #include <abstractions/nameservice>
+
+    /bin/dash rix,
+    /bin/rm ix,
+    /bin/tar ix,
+    /bin/gzip ix,
+    /usr/bin/gconftool-2 ix,
+    /usr/bin/evolution Px,
+
+    owner @{HOME}/ r,
+
+    # What to backup
+    owner @{HOME}/.camel_certs/ r,
+    owner @{HOME}/.camel_certs/* r,
+
+    owner @{HOME}/.evolution/ r,
+    owner @{HOME}/.evolution/** r,
+    owner @{HOME}/.gnome2_private/Evolution r,
+
+    owner @{HOME}/.cache/evolution/ r,
+    owner @{HOME}/.cache/evolution/** r,
+    owner @{HOME}/.config/evolution/ r,
+    owner @{HOME}/.config/evolution/** r,
+    owner @{HOME}/.local/share/evolution/ r,
+    owner @{HOME}/.local/share/evolution/** r,
+
+    # Where to backup
+    owner @{HOME}/evolution-backup*.tar.gz w,
+    owner @{HOME}/evolution.dir* rw,
+    owner @{HOME}/.local/share/evolution/backup-restore-gconf.xml* rw,
   }
 }
