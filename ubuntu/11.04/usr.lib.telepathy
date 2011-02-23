@@ -17,6 +17,7 @@
     owner @{HOME}/.cache/.mc_connections rw,
 }
 
+# This could be broken out into the various binaries, but for now, ok
 /usr/lib/telepathy/telepathy-* {
     #include <abstractions/base>
     #include <abstractions/dbus-session>
@@ -35,6 +36,8 @@
     /usr/lib/purple*/*.so        mr,
     /usr/lib/telepathy/*/        r,
     /usr/lib/telepathy/*/*.so    mr,
+    /usr/lib/libproxy*/modules/     r,
+    /usr/lib/libproxy*/modules/*.so mr,
 
     owner @{HOME}/.cache/telepathy/          rw,
     owner @{HOME}/.cache/telepathy/**        rwk,
@@ -43,4 +46,7 @@
 
     owner @{HOME}/.cache/wocky/caps/                rw,
     owner @{HOME}/.cache/wocky/caps/*.db{,-journal} rwk,
+
+    owner @{HOME}/.local/share/TpLogger/   r,
+    owner @{HOME}/.local/share/TpLogger/** rwk,
 }
