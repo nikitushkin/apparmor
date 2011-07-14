@@ -1,0 +1,151 @@
+# vim:syntax=apparmor
+# Author: Jamie Strandboge <jamie@canonical.com>
+# TODO:
+# - imports
+# - backup/restore
+# - spam filtering with bogofilter
+# - dbus mediation for evolution-data-server
+# - lot's more (evolution is huge)
+
+#include <tunables/global>
+
+/usr/bin/evolution {
+  #include <abstractions/audio>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/python>
+  #include <abstractions/ibus>
+  #include <abstractions/enchant>
+
+  #include <abstractions/ubuntu-browsers>
+
+  / r,
+  deny /boot/{vmlinuz,initrd}* r,
+  /etc/timezone r,
+  deny @{PROC}/*/fd/ r, # investigate
+  /usr/include/python2.7/pyconfig.h r,
+  /usr/share/evolution-data-server-*/** r,
+  /usr/share/evolution/** r,
+  /usr/share/gtkhtml-*/** r,
+  /usr/bin/evolution mrix,
+
+  # Helper applications
+  /usr/lib/evolution/*/killev Cx -> killev,
+  /usr/lib/evolution/*/evolution-backup Cx -> backup,
+  /usr/bin/gpg Cx -> gpg,
+  /usr/bin/evince PUx,
+  /usr/bin/seahorse-tool ix,
+  /usr/share/seahorse-plugins/** r,
+
+  owner @{HOME}/.gnome2_private/Evolution rw,
+  owner @{HOME}/.camel_certs/ rw,
+  owner @{HOME}/.camel_certs/* rw,
+
+  # Old evolution storage locations
+  owner @{HOME}/.evolution/ rw,
+  owner @{HOME}/.evolution/** rwlk,
+  owner @{HOME}/.gnome2/accels/evolution rw,
+
+  # New evolution storage locations
+  owner @{HOME}/.cache/evolution/ rw,
+  owner @{HOME}/.cache/evolution/** rwkl,
+  owner @{HOME}/.config/evolution/ rw,
+  owner @{HOME}/.config/evolution/** rwkl,
+  owner @{HOME}/.local/share/evolution/ rw,
+  owner @{HOME}/.local/share/evolution/** rwkl,
+
+  # Default profile allows saves to ~/Downloads and attachments from ~/Public
+  owner @{HOME}/ r,
+  owner @{HOME}/Public/ r,
+  owner @{HOME}/Public/* r,
+  owner @{HOME}/Downloads/ r,
+  owner @{HOME}/Downloads/* rw,
+
+  # Possibly in abstractions?
+  owner @{HOME}/.goutputstream-* rw,
+  owner @{HOME}/.thumbnails/** r,
+
+  owner @{HOME}/.local/share/gvfs-metadata/home* r,
+
+  owner @{HOME}/.pki/ rw,
+  owner @{HOME}/.pki/nssdb/ rw,
+  owner @{HOME}/.pki/nssdb/* rwk,
+
+  /usr/share/xml/iso-codes/* r,
+
+  /var/lib/dbus/machine-id r,
+
+  /usr/share/libthai/thbrk.tri r,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.evolution>
+
+  profile killev {
+    #include <abstractions/base>
+    #include <abstractions/gnome>
+    #include <abstractions/nameservice>
+
+    capability sys_ptrace,
+
+    /bin/dash rix,
+    @{PROC}/ r,
+    @{PROC}/*/cmdline r,
+    @{PROC}/*/stat r,
+    deny @{PROC}/*/fd/ r,
+    /usr/bin/killall rix,
+
+    /usr/bin/evolution Px,
+
+    owner @{HOME}/.config/evolution/.running r,
+  }
+
+  profile gpg {
+    #include <abstractions/base>
+    /usr/bin/gpg mr,
+    owner @{HOME}/.gnupg r,
+    owner @{HOME}/.gnupg/gpg.conf r,
+    owner @{HOME}/.gnupg/random_seed rwk,
+    owner @{HOME}/.gnupg/pubring.gpg r,
+    owner @{HOME}/.gnupg/secring.gpg r,
+    owner @{HOME}/.gnupg/trustdb.gpg rw,
+    owner @{HOME}/.gnupg/*.gpg.{lock,tmp} wl,
+    owner @{HOME}/.gnupg/.#*[0-9] rw,
+
+    owner /tmp/evolution-pgp.* rw,
+  }
+
+  profile backup {
+    #include <abstractions/base>
+    #include <abstractions/gnome>
+    #include <abstractions/nameservice>
+
+    /bin/dash rix,
+    /bin/rm ix,
+    /bin/tar ix,
+    /bin/gzip ix,
+    /usr/bin/gconftool-2 ix,
+    /usr/bin/evolution Px,
+
+    owner @{HOME}/ r,
+
+    # What to backup
+    owner @{HOME}/.camel_certs/ r,
+    owner @{HOME}/.camel_certs/* r,
+
+    owner @{HOME}/.evolution/ r,
+    owner @{HOME}/.evolution/** r,
+    owner @{HOME}/.gnome2_private/Evolution r,
+
+    owner @{HOME}/.cache/evolution/ r,
+    owner @{HOME}/.cache/evolution/** r,
+    owner @{HOME}/.config/evolution/ r,
+    owner @{HOME}/.config/evolution/** r,
+    owner @{HOME}/.local/share/evolution/ r,
+    owner @{HOME}/.local/share/evolution/** r,
+
+    # Where to backup
+    owner @{HOME}/evolution-backup*.tar.gz w,
+    owner @{HOME}/evolution.dir* rw,
+    owner @{HOME}/.local/share/evolution/backup-restore-gconf.xml* rw,
+  }
+}
