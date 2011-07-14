@@ -28,7 +28,7 @@ sudo apparmor_parser -r /etc/apparmor.d/profile.name
 
 For more information, please see the appropriate documentation for your
 specific distribution here:
-https://apparmor.wiki.kernel.org/index.php/Main_Page#Documentation
+http://wiki.apparmor.net/index.php/Main_Page#Documentation
 
 
 -----------------
@@ -40,7 +40,7 @@ Patches to this repository can be contributed by posting them to the
 AppArmor mailing list (https://lists.ubuntu.com/mailman/listinfo/apparmor).
 
 Please read through the commit policy before sending patches:
-https://apparmor.wiki.kernel.org/index.php/CommitPolicy
+http://wiki.apparmor.net/index.php/CommitPolicy
 
 
 
