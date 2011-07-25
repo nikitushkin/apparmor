@@ -25,19 +25,31 @@
     #include <abstractions/ssl_certs>
     #include <abstractions/user-tmp>
 
+    /bin/dash ix,
+    /usr/bin/gconftool-2 ix,
+
     # Maybe in abstractions?
     owner @{HOME}/.{cache,config}/dconf/user rw,
+    owner /var/run/gdm/*/database r,
+
+    # from gnome abstraction
+    /usr/share/gvfs/remote-volume-monitors/  r,
+    /usr/share/gvfs/remote-volume-monitors/* r,
+
+    owner @{PROC}/[0-9]*/fd/ r,
 
     /usr/share/glib-*/schemas/   r,
     /usr/share/glib-*/schemas/** r,
+    /usr/share/purple/           r,
+    /usr/share/purple/**         r,
     /usr/share/themes/           r,
     /usr/share/themes/**         r,
     /usr/lib/purple*/            r,
     /usr/lib/purple*/*.so        mr,
     /usr/lib/telepathy/*/        r,
     /usr/lib/telepathy/*/*.so    mr,
-    /usr/lib/libproxy*/modules/     r,
-    /usr/lib/libproxy*/modules/*.so mr,
+    /usr/lib/libproxy*/*/modules/     r,
+    /usr/lib/libproxy*/*/modules/*.so mr,
 
     owner @{HOME}/.cache/telepathy/          rw,
     owner @{HOME}/.cache/telepathy/**        rwk,
