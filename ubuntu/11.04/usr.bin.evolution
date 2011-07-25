@@ -22,12 +22,16 @@
   / r,
   deny /boot/{vmlinuz,initrd}* r,
   /etc/timezone r,
-  deny @{PROC}/*/fd/ r, # investigate
+  owner @{PROC}/*/fd/ r, # needed for addressbook manipulation
   /usr/include/python2.7/pyconfig.h r,
   /usr/share/evolution-data-server-*/** r,
   /usr/share/evolution/** r,
   /usr/share/gtkhtml-*/** r,
   /usr/bin/evolution mrix,
+
+  # Noisy when searching /tmp for file attachments
+  deny /tmp/.X0-lock r,
+  deny /tmp/.pkapi_xpk r,
 
   # Helper applications
   /usr/lib/evolution/*/killev Cx -> killev,
@@ -36,6 +40,7 @@
   /usr/bin/evince PUx,
   /usr/bin/seahorse-tool ix,
   /usr/share/seahorse-plugins/** r,
+  /usr/bin/gedit Cx -> gedit,
 
   owner @{HOME}/.gnome2_private/Evolution rw,
   owner @{HOME}/.camel_certs/ rw,
@@ -64,6 +69,7 @@
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
   owner @{HOME}/.thumbnails/** r,
+  /usr/share/gnome/applications/mimeinfo.cache r,
 
   owner @{HOME}/.local/share/gvfs-metadata/home* r,
 
@@ -147,5 +153,39 @@
     owner @{HOME}/evolution-backup*.tar.gz w,
     owner @{HOME}/evolution.dir* rw,
     owner @{HOME}/.local/share/evolution/backup-restore-gconf.xml* rw,
+  }
+
+  profile gedit {
+    #include <abstractions/gnome>
+    #include <abstractions/enchant>
+    #include <abstractions/ibus>
+    #include <abstractions/private-files-strict>
+
+    /usr/bin/gedit r,
+
+    /etc/passwd r,
+    deny /etc/nsswitch.conf r,
+    deny /tmp/.X0-lock r,
+
+    /sys/devices/**/block/**/uevent r,
+    /dev/.udev/db/* r,
+    /etc/udev/udev.conf r,
+    /var/lib/dbus/machine-id r,
+    @{PROC}/[0-9]*/mountinfo r,
+
+    /usr/share/gedit-2/ r,
+    /usr/share/gedit-2/** r,
+    /usr/share/gtksourceview-2.0/ r,
+    /usr/share/gtksourceview-2.0/** r,
+
+    owner @{HOME}/.cache/evolution/tmp/** r,
+    owner @{HOME}/.local/share/gvfs-metadata/ r,
+    owner @{HOME}/.local/share/gvfs-metadata/** r,
+    owner @{HOME}/.gnome2/accels/gedit rw,
+    owner @{HOME}/.gnome2/gedit/ r,
+    owner @{HOME}/.gnome2/gedit/** rw,
+
+    # allow writes here
+    owner @{HOME}/Downloads/** rw,
   }
 }
