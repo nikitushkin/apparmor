@@ -41,8 +41,8 @@
 
 	/bin/dash rix,
 
-	/dev/shm/ r,
-	/dev/shm/* rw,
+	/{dev,run}/shm/ r,
+	/{dev,run}/shm/* rw,
 
 	/etc/ r,
 	/etc/pulse/client.conf r,

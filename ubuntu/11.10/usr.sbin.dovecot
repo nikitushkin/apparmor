@@ -28,6 +28,6 @@
   /usr/sbin/dovecot mr,
   /var/lib/dovecot/ w,
   /var/lib/dovecot/* krw,
-  /var/run/dovecot/ rw,
-  /var/run/dovecot/** rw,
+  /{,var/}run/dovecot/ rw,
+  /{,var/}run/dovecot/** rw,
 }
