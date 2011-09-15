@@ -1,0 +1,18 @@
+# Author: Felix Geyer <debfx@ubuntu.com>
+
+#include <tunables/global>
+
+/usr/bin/quasselcore {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/ssl_certs>
+
+  /var/lib/quassel/ rw,
+  /var/lib/quassel/** rwk,
+
+  /var/log/quassel/* rw,
+
+  /etc/ssl/openssl.cnf r,
+  /usr/lib/ssl/openssl.cnf r,
+}
