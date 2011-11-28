@@ -7,6 +7,7 @@
   #include <abstractions/nameservice>
   #include <abstractions/wutmp>
 
+  capability setuid,
   capability setgid,
   capability chown,
   capability dac_override,
