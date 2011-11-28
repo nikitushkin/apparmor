@@ -8,7 +8,7 @@
   capability setgid,
   capability setuid,
 
-  /var/mail/* klrw,
+  /var/mail/** klrw,
   @{HOME} r,
   @{HOME}/mail/* klrw,
   @{HOME}/mail/.imap/** klrw,
