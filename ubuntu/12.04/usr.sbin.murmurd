@@ -1,0 +1,29 @@
+# Author: Felix Geyer <debfx@ubuntu.com>
+# TODO: adjust lsb_release PUx (see below)
+
+#include <tunables/global>
+
+/usr/sbin/murmurd {
+  #include <abstractions/base>
+  #include <abstractions/user-tmp>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+
+  # required for MURMUR_USE_CAPABILITIES=1
+  capability setgid,
+  capability setuid,
+  capability sys_resource,
+
+  /etc/xdg/Trolltech.conf r,
+  deny /etc/xdg/Trolltech.conf k,
+
+  # TODO: this would be better served as a child profile. If enough
+  # applications need it, we can add the child profile to an abstraction
+  /usr/bin/lsb_release PUx,
+
+  /etc/mumble-server.ini rk,
+  /var/lib/mumble-server/ r,
+  /var/lib/mumble-server/** rwk,
+  /{,var/}run/mumble-server/mumble-server.pid rw,
+  /var/log/mumble-server/* rw,
+}
