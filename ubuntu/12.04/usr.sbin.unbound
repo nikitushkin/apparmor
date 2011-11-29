@@ -1,3 +1,4 @@
+# TODO: comment on why we need 'capability dac_override'
 # vim:syntax=apparmor
 #include <tunables/global>
 
