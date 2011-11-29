@@ -16,5 +16,5 @@
   @{HOME}/mail/* klrw,
   @{HOME}/mail/.imap/** klrw,
   /usr/lib/dovecot/deliver mr,
-  /var/mail/* klrw,
+  /var/mail/** klrw,
 }
