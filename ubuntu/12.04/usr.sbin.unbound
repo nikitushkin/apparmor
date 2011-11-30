@@ -1,4 +1,4 @@
-# TODO: comment on why we need 'capability dac_override'
+# Author: Simon Deziel
 # vim:syntax=apparmor
 #include <tunables/global>
 
@@ -16,10 +16,16 @@
   owner @{PROC}/[0-9]*/net/if_inet6 r,
   owner @{PROC}/[0-9]*/net/ipv6_route r,
 
-  /{,var/lib/unbound/}etc/unbound/** r,
-  owner /{,var/lib/unbound/}etc/unbound/*.key rw,
-  audit deny /{,var/lib/unbound/}etc/unbound/unbound_server.key w,
-  audit deny /{,var/lib/unbound/}etc/unbound/unbound_control.key w,
+  # non-chrooted paths
+  /etc/unbound/** r,
+  owner /etc/unbound/*.key rw,
+  audit deny /etc/unbound/unbound_{control,server}.key w,
+
+  # chrooted paths
+  /var/lib/unbound/** r,
+  owner /var/lib/unbound/**/*.key rw,
+  audit deny /var/lib/unbound/unbound_{control,server}.key w,
+
   /etc/ssl/openssl.cnf r,
 
   /usr/sbin/unbound mr,
