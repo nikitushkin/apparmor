@@ -8,7 +8,6 @@
   capability net_bind_service,
   capability setgid,
   capability setuid,
-  capability chown,
   capability sys_chroot,
   capability sys_resource,
 
