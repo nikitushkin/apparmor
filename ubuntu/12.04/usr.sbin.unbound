@@ -18,6 +18,11 @@
   owner @{PROC}/[0-9]*/net/if_inet6 r,
   owner @{PROC}/[0-9]*/net/ipv6_route r,
 
+  # unbound wants to mmap those files but that's not
+  # authorized in the nameservice abstraction
+  /etc/passwd rm,
+  /etc/group rm,
+
   # non-chrooted paths
   /etc/unbound/** r,
   owner /etc/unbound/*.key rw,
