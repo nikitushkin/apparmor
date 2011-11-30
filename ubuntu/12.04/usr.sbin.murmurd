@@ -1,5 +1,4 @@
 # Author: Felix Geyer <debfx@ubuntu.com>
-# TODO: adjust lsb_release PUx (see below)
 
 #include <tunables/global>
 
@@ -17,13 +16,26 @@
   /etc/xdg/Trolltech.conf r,
   deny /etc/xdg/Trolltech.conf k,
 
-  # TODO: this would be better served as a child profile. If enough
-  # applications need it, we can add the child profile to an abstraction
-  /usr/bin/lsb_release PUx,
+  /usr/bin/lsb_release Cxr -> lsb_release,
 
   /etc/mumble-server.ini rk,
   /var/lib/mumble-server/ r,
   /var/lib/mumble-server/** rwk,
   /{,var/}run/mumble-server/mumble-server.pid rw,
   /var/log/mumble-server/* rw,
+
+  profile lsb_release {
+    #include <abstractions/base>
+    #include <abstractions/python>
+
+    /usr/bin/lsb_release r,
+    /bin/dash ixr,
+    /usr/bin/dpkg-query ixr,
+
+    /usr/include/python2.[4567]/pyconfig.h r,
+
+    /etc/lsb-release r,
+    /etc/debian_version r,
+    /var/lib/dpkg/** r,
+  }
 }
