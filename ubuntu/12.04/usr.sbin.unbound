@@ -11,7 +11,6 @@
   capability chown,
   capability sys_chroot,
   capability sys_resource,
-  capability dac_override,
 
   # for networking
   owner @{PROC}/[0-9]*/net/if_inet6 r,
