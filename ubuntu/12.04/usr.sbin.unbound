@@ -15,12 +15,10 @@
   owner @{PROC}/[0-9]*/net/if_inet6 r,
   owner @{PROC}/[0-9]*/net/ipv6_route r,
 
-  /etc/unbound/** r,
-  owner /etc/unbound/*.key rw,
-  audit deny /etc/unbound/unbound_server.key w,
-  audit deny /etc/unbound/unbound_control.key w,
-  /var/lib/unbound/** r,
-  owner /var/lib/unbound/**/*.key rw,
+  /{,var/lib/unbound/}etc/unbound/** r,
+  owner /{,var/lib/unbound/}etc/unbound/*.key rw,
+  audit deny /{,var/lib/unbound/}etc/unbound/unbound_server.key w,
+  audit deny /{,var/lib/unbound/}etc/unbound/unbound_control.key w,
   /etc/ssl/openssl.cnf r,
 
   /usr/sbin/unbound mr,
