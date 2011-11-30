@@ -26,6 +26,7 @@
   # non-chrooted paths
   /etc/unbound/** r,
   owner /etc/unbound/*.key rw,
+  owner /var/lib/unbound/root.key rw,
   audit deny /etc/unbound/unbound_{control,server}.key w,
 
   # chrooted paths
