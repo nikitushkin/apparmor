@@ -22,17 +22,18 @@
 
   /usr/bin/gnome-screensaver-command rix,
 
-  @{HOME}/.WorldOfGoo/** rw,
+  owner @{HOME}/.WorldOfGoo/ rw,
+  owner @{HOME}/.WorldOfGoo/** rw,
 
   /etc/timidity/freepats.cfg r,
 
-  @{PROC}/[0-9]*/cmdline r,
-  @{PROC}/[0-9]*/statm r,
+  owner @{PROC}/[0-9]*/cmdline r,
+  owner @{PROC}/[0-9]*/statm r,
   @{PROC}/filesystems r,
 
   # World of Goo seems to like to mmap files more than some of the
   # abstractions allow for...
-  /run/shm/pulse-shm-* mr,
+  owner /run/shm/pulse-shm-* mr,
   /usr/share/locale-langpack/** mr,
   /dev/dri/card0 mrw,
 
