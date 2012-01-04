@@ -11,6 +11,8 @@
   # Maybe in an abstraction?
   /usr/include/**/pyconfig.h r,
 
+  /usr/bin/totem r,
+
   # Allow read and write on anything in @{HOME}. Lenient, but
   # private-files-strict is in effect.
   #include <abstractions/private-files-strict>
