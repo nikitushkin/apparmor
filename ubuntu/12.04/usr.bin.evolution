@@ -17,6 +17,7 @@
   #include <abstractions/ibus>
   #include <abstractions/enchant>
 
+  #include <abstractions/ubuntu-helpers>
   #include <abstractions/ubuntu-browsers>
 
   / r,
@@ -37,7 +38,7 @@
   /usr/lib/evolution/*/killev Cx -> killev,
   /usr/lib/evolution/*/evolution-backup Cx -> backup,
   /usr/bin/gpg Cx -> gpg,
-  /usr/bin/evince PUx,
+  /usr/bin/evince Pix,
   /usr/bin/seahorse-tool ix,
   /usr/share/seahorse-plugins/** r,
   /usr/bin/gedit Cx -> gedit,
@@ -69,7 +70,11 @@
   # Possibly in abstractions?
   owner @{HOME}/.goutputstream-* rw,
   owner @{HOME}/.thumbnails/** r,
+  /usr/share/gnome/applications/mimeinfo.cache r,
+  /usr/share/glib-*/schemas/* r,
 
+  owner @{HOME}/.cache/dconf/user rw,
+  owner @{HOME}/.config/dconf/user r,
   owner @{HOME}/.local/share/gvfs-metadata/home* r,
 
   owner @{HOME}/.pki/ rw,
@@ -172,17 +177,21 @@
     /var/lib/dbus/machine-id r,
     @{PROC}/[0-9]*/mountinfo r,
 
-    /usr/share/gedit-2/ r,
-    /usr/share/gedit-2/** r,
-    /usr/share/gtksourceview-2.0/ r,
-    /usr/share/gtksourceview-2.0/** r,
+    /usr/share/gedit{,-2}/ r,
+    /usr/share/gedit{,-2}/** r,
+    /usr/share/gtksourceview-[2-9]*/ r,
+    /usr/share/gtksourceview-[2-9]*/** r,
+
+    # possibly in abstractions?
+    /usr/share/glib-*/schemas/* r,
+    owner @{HOME}/.{cache,config}/dconf/user rw,
 
     owner @{HOME}/.cache/evolution/tmp/** r,
     owner @{HOME}/.local/share/gvfs-metadata/ r,
     owner @{HOME}/.local/share/gvfs-metadata/** r,
     owner @{HOME}/.gnome2/accels/gedit rw,
-    owner @{HOME}/.gnome2/gedit/ r,
-    owner @{HOME}/.gnome2/gedit/** rw,
+    owner @{HOME}/.{config,gnome2}/gedit/ r,
+    owner @{HOME}/.{config,gnome2}/gedit/** rw,
 
     # allow writes here
     owner @{HOME}/Downloads/** rw,
