@@ -24,6 +24,10 @@
   owner @{HOME}/.config/gwibber/ rw,
   owner @{HOME}/.config/gwibber/** rwk,
 
+  # maybe in an abstraction?
+  owner @{HOME}/.cache/sso/sso-client.log rw,
+  owner @{HOME}/.cache/sso/sso-client-gui.log rw,
+
   /usr/bin/ r,
   /usr/bin/python2.7 ix,
   /bin/dash rix,
