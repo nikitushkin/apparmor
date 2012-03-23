@@ -8,7 +8,9 @@
 /usr/bin/empathy {
   #include <abstractions/nameservice>
   #include <abstractions/audio>
+  #include <abstractions/enchant>
   #include <abstractions/gnome>
+  #include <abstractions/ibus>
   #include <abstractions/launchpad-integration>
 
   # Helper applications
@@ -19,7 +21,8 @@
 
   # For opening URLs
   #include <abstractions/ubuntu-browsers>
-  deny @{PROC}/[0-9]*/fd/ r, # investigate
+  deny @{PROC}/[0-9]*/fd/ r,  # investigate
+  deny @{PROC}/[0-9]*/auxv r, # investigate
 
   /usr/share/adium/** r,
   /usr/share/empathy/** r,
@@ -46,6 +49,7 @@
 
   # Possibly in abstractions?
   owner @{HOME}/.gstreamer-0.10/registry.x86_64.bin* rw,
+  /sys/devices/system/cpu/online r,
 
   owner @{HOME}/.local/share/webkit/icondatabase/ r,
   owner @{HOME}/.local/share/webkit/icondatabase/*.db{,-journal} rwk,
@@ -53,21 +57,8 @@
   owner @{HOME}/.cache/dconf/user rw,
   owner @{HOME}/.config/dconf/user r,
 
-  owner @{HOME}/.config/ibus/ r,
-  owner @{HOME}/.config/ibus/** rwk,
-
-  /usr/share/applications/mimeinfo.cache r,
-  /usr/share/applications/*.desktop r,
-  owner @{HOME}/.local/share/applications/defaults.list r,
-  owner @{HOME}/.local/share/applications/mimeinfo.cache r,
-  owner @{HOME}/.local/share/applications/mimeapps.list r,
-
-  /usr/share/enchant/** r,
-  owner @{HOME}/.config/enchant/ r,
-  owner @{HOME}/.config/enchant/** r,
-  owner @{HOME}/.config/enchant/*.{dic,exc} wk,
-  /usr/share/{hunspell,myspell}/ r,
-  /usr/share/{hunspell,myspell}/** r,
+  /usr/share/notify-osd/icons/ r,
+  /usr/share/notify-osd/icons/** r,
 
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.empathy>
