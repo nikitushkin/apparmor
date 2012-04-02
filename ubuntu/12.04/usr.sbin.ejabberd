@@ -2,7 +2,7 @@
 
 #include <tunables/global>
 
-/usr/sbin/ejabberd {
+/usr/sbin/ejabberd{,ctl} {
   #include <abstractions/base>
   #include <abstractions/user-tmp>
   #include <abstractions/nameservice>
@@ -11,6 +11,7 @@
   /etc/default/ejabberd r,
   /etc/ejabberd/* r,
   /usr/sbin/ejabberd r,
+  /usr/sbin/ejabberdctl r,
   /var/log/ejabberd/* rw,
   /{,var/}run/ejabberd/ejabberd.pid rw,
   /var/lib/ejabberd/ r,
