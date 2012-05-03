@@ -45,11 +45,11 @@
     /var/lib/squidguard/** rw,
 
     # squidguard by default uses /var/log/squid as its logdir, however, we
-    # don't want it to modify squid's logs, only its own. Explicitly deny
-    # writes to squid's files but allow all others since the user may specify
-    # anything via the squidGuard 'log' directive.
+    # don't want it to access squid's logs, only its own. Explicitly deny
+    # access to squid's files but allow all others since the user may specify
+    # anything for the squidGurad 'log' directive.
     /var/log/squid/* rw,
-    audit deny /var/log/squid/{access,cache,store}.log* w,
+    audit deny /var/log/squid/{access,cache,store}.log* rw,
 
     # Site-specific additions and overrides. See local/README for details.
     #include <local/usr.sbin.squid>
