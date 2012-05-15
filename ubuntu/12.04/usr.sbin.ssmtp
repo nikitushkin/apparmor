@@ -5,6 +5,7 @@
 /usr/sbin/ssmtp {
   #include <abstractions/base>
   #include <abstractions/nameservice>
+  #include <abstractions/p11-kit>
   #include <abstractions/ssl_certs>
 
   /etc/ssmtp/* r,
