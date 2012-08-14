@@ -46,8 +46,8 @@
   /usr/bin/gedit Cx -> gedit,
 
   owner @{HOME}/.gnome2_private/Evolution rw,
-  owner @{HOME}/{.,.local/share/}camel_certs/ rw,
-  owner @{HOME}/{.,.local/share/}camel_certs/* rw,
+  owner @{HOME}/.{,local/share/}camel_certs/ rw,
+  owner @{HOME}/.{,local/share/}camel_certs/* rw,
 
   # Old evolution storage locations
   owner @{HOME}/.evolution/ rw,
@@ -148,8 +148,8 @@
     owner @{HOME}/ r,
 
     # What to backup
-    owner @{HOME}/{.,.local/share/}camel_certs/ r,
-    owner @{HOME}/{.,.local/share/}camel_certs/* r,
+    owner @{HOME}/.{,local/share/}camel_certs/ r,
+    owner @{HOME}/.{,local/share/}camel_certs/* r,
 
     owner @{HOME}/.evolution/ r,
     owner @{HOME}/.evolution/** r,
