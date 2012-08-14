@@ -27,6 +27,8 @@
   /usr/include/python2.7/pyconfig.h r,
   /usr/share/evolution-data-server-*/** r,
   /usr/share/evolution/** r,
+  /usr/lib/evolution/*/modules/*.so mr,
+  /usr/share/mx/style/*.css r,
   /usr/share/gtkhtml-*/** r,
   /usr/bin/evolution mrix,
 
@@ -44,8 +46,8 @@
   /usr/bin/gedit Cx -> gedit,
 
   owner @{HOME}/.gnome2_private/Evolution rw,
-  owner @{HOME}/.camel_certs/ rw,
-  owner @{HOME}/.camel_certs/* rw,
+  owner @{HOME}/{.,.local/share/}camel_certs/ rw,
+  owner @{HOME}/{.,.local/share/}camel_certs/* rw,
 
   # Old evolution storage locations
   owner @{HOME}/.evolution/ rw,
@@ -59,6 +61,10 @@
   owner @{HOME}/.config/evolution/** rwkl,
   owner @{HOME}/.local/share/evolution/ rw,
   owner @{HOME}/.local/share/evolution/** rwkl,
+
+  owner @{HOME}/.local/share/webkit/ rw,
+  owner @{HOME}/.local/share/webkit/icondatabase/ rw,
+  owner @{HOME}/.local/share/webkit/icondatabase/WebpageIcons.db rwkl,
 
   # Default profile allows saves to ~/Downloads and attachments from ~/Public
   owner @{HOME}/ r,
@@ -86,6 +92,9 @@
   /var/lib/dbus/machine-id r,
 
   /usr/share/libthai/thbrk.tri r,
+
+  # These shouldn't be needed by evolution
+  deny @{HOME}/.config/gtk-3.0/bookmarks rw,
 
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.evolution>
@@ -139,8 +148,8 @@
     owner @{HOME}/ r,
 
     # What to backup
-    owner @{HOME}/.camel_certs/ r,
-    owner @{HOME}/.camel_certs/* r,
+    owner @{HOME}/{.,.local/share/}camel_certs/ r,
+    owner @{HOME}/{.,.local/share/}camel_certs/* r,
 
     owner @{HOME}/.evolution/ r,
     owner @{HOME}/.evolution/** r,
