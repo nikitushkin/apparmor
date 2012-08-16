@@ -16,6 +16,7 @@
   #include <abstractions/python>
   #include <abstractions/ibus>
   #include <abstractions/enchant>
+  #include <abstractions/ssl_certs>
 
   #include <abstractions/ubuntu-helpers>
   #include <abstractions/ubuntu-browsers>
@@ -62,9 +63,16 @@
   owner @{HOME}/.local/share/evolution/ rw,
   owner @{HOME}/.local/share/evolution/** rwkl,
 
+  # Webkit integration
+  owner @{HOME}/.cache/thumbnails/** r,
   owner @{HOME}/.local/share/webkit/ rw,
   owner @{HOME}/.local/share/webkit/icondatabase/ rw,
-  owner @{HOME}/.local/share/webkit/icondatabase/WebpageIcons.db rwkl,
+  owner @{HOME}/.local/share/webkit/icondatabase/WebpageIcons.db* rwkl,
+  # LP: #1037669
+  deny /usr/lib/@{multiarch}/gstreamer*/ rwmkl,
+  deny /usr/lib/@{multiarch}/gstreamer*/** rwmklx,
+  deny @{HOME}/.gstreamer*/** rwmkl,
+  deny @{HOME}/.gstreamer*/ rw,
 
   # Default profile allows saves to ~/Downloads and attachments from ~/Public
   owner @{HOME}/ r,
