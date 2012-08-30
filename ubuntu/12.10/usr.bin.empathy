@@ -31,7 +31,15 @@
   /usr/share/telepathy/** r,
   /usr/share/xml/iso-codes/*.xml r,
 
-  /var/lib/dbus/machine-id r,
+  # This doesn't seem to actually be needed
+  deny /var/lib/dbus/machine-id r,
+
+  # For new online accounts integration
+  #include <abstractions/ubuntu-helpers>
+  /usr/bin/gnome-control-center Cx -> sanitized_helper,
+
+  # Help browser
+  /usr/bin/yelp Cx -> sanitized_helper,
 
   owner @{HOME}/ r,
   owner @{HOME}/.cache/telepathy/ rw,
@@ -74,7 +82,8 @@
     /usr/bin/empathy-debugger r,
     /usr/share/empathy/** r,
 
-    /var/lib/dbus/machine-id r,
+    # This doesn't seem to actually be needed
+    deny /var/lib/dbus/machine-id r,
     /tmp/.X[0-9]*-lock r,
 
     owner @{HOME}/.config/Empathy/ r,
