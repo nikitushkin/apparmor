@@ -16,6 +16,8 @@
   /usr/bin/gwibber-service r,
   /usr/share/gwibber/** r,
   /usr/share/glib-2.0/schemas/* r,
+  /usr/share/accounts/services/ r,
+  /usr/share/accounts/services/** r,
 
   owner /{,var/}run/shm/sem.* rwkl,
 
@@ -23,6 +25,7 @@
   owner @{HOME}/.cache/gwibber/** rw,
   owner @{HOME}/.config/gwibber/ rw,
   owner @{HOME}/.config/gwibber/** rwk,
+  owner @{HOME}/.config/libaccounts-glib/accounts.db{,-shm,-wal} rwk,
 
   # maybe in an abstraction?
   owner @{HOME}/.cache/sso/sso-client.log rw,
@@ -47,6 +50,8 @@
   # noisy
   deny /usr/share/gwibber/** w,
   deny /var/lib/libuuid/clock.txt w,
+  deny /usr/lib/python2.[4567]/dist-packages/ubuntuone-storage-protocol/ubuntuone/__init__.pyc w,
+
 
   # Not required for launchpad-integration to work within gwibber itself
   deny /etc/default/apport r,
