@@ -25,6 +25,7 @@
   deny /boot/{vmlinuz,initrd}* r,
   /etc/timezone r,
   owner @{PROC}/*/fd/ r, # needed for addressbook manipulation
+  owner @{PROC}/[0-9]*/auxv r, # investigate
   /usr/include/python2.7/pyconfig.h r,
   /usr/share/evolution-data-server-*/** r,
   /usr/share/evolution/** r,
@@ -39,7 +40,8 @@
 
   # Helper applications
   /usr/lib/evolution/*/killev Cx -> killev,
-  /usr/lib/evolution/*/evolution-backup Cx -> backup,
+  /usr/lib/evolution/*/evolution-backup Cx -> evohelper,
+  /usr/lib/evolution/*/evolution-alarm-notify Cx -> evohelper,
   /usr/bin/gpg Cx -> gpg,
   /usr/bin/evince Pix,
   /usr/bin/seahorse-tool ix,
@@ -141,10 +143,12 @@
     owner /tmp/evolution-pgp.* rw,
   }
 
-  profile backup {
+  profile evohelper {
     #include <abstractions/base>
     #include <abstractions/gnome>
     #include <abstractions/nameservice>
+
+    owner @{PROC}/[0-9]*/auxv r, # investigate
 
     /bin/dash rix,
     /bin/rm ix,
@@ -152,6 +156,10 @@
     /bin/gzip ix,
     /usr/bin/gconftool-2 ix,
     /usr/bin/evolution Px,
+
+    # For evolution-alarm-notify
+    /usr/share/glib-*/schemas/* r,
+    owner @{HOME}/.{cache,config}/dconf/user rw,
 
     owner @{HOME}/ r,
 
@@ -212,5 +220,8 @@
 
     # allow writes here
     owner @{HOME}/Downloads/** rw,
+
+    # not strictly needed
+    deny @{HOME}/.config/gtk-3.0/bookmarks rw,
   }
 }
