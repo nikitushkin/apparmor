@@ -14,8 +14,6 @@
   /usr/share/spotify/theme/**.{png,ico} r,
   /usr/share/spotify/theme/**.{splang,xml} r,
 
-  /var/run/gdm/auth-for-steve-*/database r,
-
   owner @{PROC}/[0-9]*/task/ r,
 
   owner @{HOME}/.cache/spotify/ rw,
