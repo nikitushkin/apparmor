@@ -4,6 +4,7 @@
 /usr/bin/pulseaudio {
   #include <abstractions/base>
   #include <abstractions/audio>
+  #include <abstractions/dbus-session>
   #include <abstractions/nameservice>
   #include <abstractions/X>
 
@@ -55,8 +56,6 @@
   owner /var/lib/lightdm/.pulse/ rw,
   owner /var/lib/lightdm/.pulse/* w,
   owner /var/lib/lightdm/.pulse/* r,
-
-  /var/lib/dbus/machine-id r,
 
   # are these needed?
   /var/lib/pulse/ rw,

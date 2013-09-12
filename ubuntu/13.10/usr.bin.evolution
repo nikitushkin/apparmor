@@ -11,6 +11,7 @@
 
 /usr/bin/evolution {
   #include <abstractions/audio>
+  #include <abstractions/dbus-session>
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
   #include <abstractions/python>
@@ -99,8 +100,6 @@
 
   /usr/share/xml/iso-codes/* r,
 
-  /var/lib/dbus/machine-id r,
-
   /usr/share/libthai/thbrk.tri r,
 
   # These shouldn't be needed by evolution
@@ -185,6 +184,7 @@
   }
 
   profile gedit {
+    #include <abstractions/dbus-session>
     #include <abstractions/gnome>
     #include <abstractions/enchant>
     #include <abstractions/ibus>
@@ -199,7 +199,6 @@
     /sys/devices/**/block/**/uevent r,
     /dev/.udev/db/* r,
     /etc/udev/udev.conf r,
-    /var/lib/dbus/machine-id r,
     @{PROC}/[0-9]*/mountinfo r,
 
     /usr/share/gedit{,-2}/ r,

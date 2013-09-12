@@ -17,8 +17,7 @@
 
   #include <abstractions/gnome>
   #include <abstractions/nameservice>
-
-  /var/lib/dbus/machine-id r,
+  #include <abstractions/dbus-session>
 
   # Allow read on all directories
   /**/ r,
