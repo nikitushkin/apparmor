@@ -29,3 +29,4 @@
 
   owner /tmp/orcexec.* m,
 
+  /usr/lib/@{multiarch}/libproxy/*/modules/*.so mr,
