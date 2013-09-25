@@ -34,3 +34,4 @@
 
   owner @{HOME}/.cache/tracker/meta.db k,
   owner @{HOME}/.cache/tracker/meta.db-shm k,
+  owner @{HOME}/.local/share/grilo-plugins/*.db k,
