@@ -11,6 +11,8 @@
 
   /etc/apt-cacher-ng/ r,
   /etc/apt-cacher-ng/** r,
+  /etc/hosts.{deny,allow} r,
+
   /var/lib/apt-cacher-ng/** r,
   /{,var/}run/apt-cacher-ng/* rw,
   @{APT_CACHE_DIR}/ r,
@@ -18,10 +20,8 @@
   /var/log/apt-cacher-ng/ r,
   /var/log/apt-cacher-ng/* rw,
 
-  /etc/hosts.allow r,
-  /etc/hosts.deny r,
-
   /bin/dash ixr,
   /bin/ed ixr,
   /bin/red ixr,
+  /bin/sed ixr,
 }
