@@ -30,6 +30,8 @@
 
   owner /tmp/orcexec.* m,
 
+  /etc/wildmidi/wildmidi.cfg r,
+
   /usr/lib/@{multiarch}/libproxy/*/modules/*.so mr,
 
   owner @{HOME}/.cache/tracker/meta.db k,
