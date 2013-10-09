@@ -33,6 +33,7 @@
   /etc/wildmidi/wildmidi.cfg r,
 
   /usr/lib/@{multiarch}/libproxy/*/modules/*.so mr,
+  /usr/lib/frei0r-[0-9]/*.so m,
 
   owner @{HOME}/.cache/tracker/meta.db k,
   owner @{HOME}/.cache/tracker/meta.db-shm k,
