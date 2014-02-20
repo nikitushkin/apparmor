@@ -28,6 +28,6 @@
   /var/log/hiawatha/* rw,
   /var/run/hiawatha.pid w,
   /var/run/nscd/passwd r,
-  /{,var/}/run/hiawatha.pid w,
+  /{,var/}run/hiawatha.pid w,
 
 }
