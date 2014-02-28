@@ -1,4 +1,4 @@
-# Last Modified: Wed Feb 19 11:39:47 2014
+# Last Modified: Fri Feb 28 20:21:49 2014
 #include <tunables/global>
 
 /usr/sbin/hiawatha {
@@ -20,11 +20,13 @@
   /etc/hiawatha/** r,
   /etc/nsswitch.conf r,
   /etc/passwd r,
+  /home/*/public_html/ r,
   /home/*/public_html/** r,
   /srv/www/hiawatha/** r,
   /usr/sbin/cgi-wrapper mr,
   /usr/sbin/hiawatha mr,
-  /var/lib/hiawatha** rw,
+  /var/lib/hiawatha/ rw,
+  /var/lib/hiawatha/** rw,
   /var/log/hiawatha/* rw,
   /var/run/hiawatha.pid w,
   /var/run/nscd/passwd r,
