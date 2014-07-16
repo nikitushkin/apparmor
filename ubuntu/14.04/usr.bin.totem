@@ -5,8 +5,15 @@
 
 /usr/bin/totem {
   #include <abstractions/audio>
+  #include <abstractions/dconf>
   #include <abstractions/python>
   #include <abstractions/totem>
+
+  /etc/udev/udev.conf r,
+  /sys/devices/pci[0-9]*/**/uevent r,
+  /run/udev/data/+pci:* r,
+
+  owner /dev/shm/shmfd-* rw,
 
   # Maybe in an abstraction?
   /usr/include/**/pyconfig.h r,
@@ -17,5 +24,6 @@
   # private-files-strict is in effect.
   #include <abstractions/private-files-strict>
   owner @{HOME}/** rw,
-}
 
+  owner /{,var/}run/user/*/dconf/user w,
+}
