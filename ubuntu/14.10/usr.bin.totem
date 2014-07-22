@@ -10,7 +10,7 @@
   #include <abstractions/totem>
 
   /etc/udev/udev.conf r,
-  /sys/devices/pci[0-9]*/**/uevent r,
+  /sys/devices/pci[0-9]*/**/{busnum,devnum,descriptors,speed,uevent} r,
   /run/udev/data/+pci:* r,
 
   # /dev/shm is a symlink to /run/shm on ubuntu
