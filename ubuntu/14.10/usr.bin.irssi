@@ -33,6 +33,7 @@
   /bin/which ixr,
 
   # config files, etc
+  /etc/irssi.conf r,
   owner @{HOME}/.irssi/ r,
   owner @{HOME}/.irssi/** r,
   owner @{HOME}/.irssi/away.log wk,
