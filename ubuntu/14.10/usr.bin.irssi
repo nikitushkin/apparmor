@@ -10,8 +10,8 @@
 
   /usr/share/irssi/themes/*.theme r,
   /usr/share/irssi/help/* r,
-  # This may be needed if using system wide scripts
-  # /usr/share/irssi/scripts/* r,
+  # Enable system wide scripts
+  /usr/share/irssi/scripts/* r,
   /usr/share/ca-certificates/** r,
   @{PROC}/uptime r,
   /bin/dash ix,
@@ -33,6 +33,7 @@
   /bin/which ixr,
 
   # config files, etc
+  /etc/irssi.conf r,
   owner @{HOME}/.irssi/ r,
   owner @{HOME}/.irssi/** r,
   owner @{HOME}/.irssi/away.log wk,
