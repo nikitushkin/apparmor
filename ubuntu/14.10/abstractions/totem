@@ -16,9 +16,9 @@
 # a maintenance problem and doesn't work for files without extensions.
 
   #include <abstractions/gnome>
+  #include <abstractions/gstreamer>
   #include <abstractions/nameservice>
   #include <abstractions/dbus-session>
-  #include <abstractions/p11-kit>
 
   # Allow read on all directories
   /**/ r,
@@ -28,14 +28,7 @@
   /usr/share/** r,
   /{media,mnt,opt,srv}/** r,
 
-  owner /tmp/orcexec.* m,
-
-  /etc/wildmidi/wildmidi.cfg r,
-
-  /usr/lib/@{multiarch}/libproxy/*/modules/*.so mr,
-  /usr/lib/@{multiarch}/libvisual-[0-9].[0-9]/*/*.so m,
-  /usr/lib/frei0r-[0-9]/*.so m,
-  /usr/lib/@{multiarch}/gstreamer[0-9].[0-9]/gstreamer-[0-9].[0-9]/gst-plugin-scanner Pix,
+  /usr/lib/@{multiarch}/gstreamer[0-9].[0-9]/gstreamer-[0-9].[0-9]/gst-plugin-scanner Cix -> gst_plugin_scanner,
 
   owner @{HOME}/.cache/tracker/meta.db k,
   owner @{HOME}/.cache/tracker/meta.db-shm k,
