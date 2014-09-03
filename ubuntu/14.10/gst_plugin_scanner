@@ -1,5 +1,7 @@
 # vim:syntax=apparmor
 
+#include <tunables/global>
+
 profile gst_plugin_scanner {
   #include <abstractions/base>
   #include <abstractions/gstreamer>
