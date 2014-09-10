@@ -10,6 +10,7 @@
   #include <abstractions/dbus-session>
   #include <abstractions/enchant>
   #include <abstractions/gnome>
+  #include <abstractions/gstreamer>
   #include <abstractions/ibus>
   #include <abstractions/launchpad-integration>
   #include <abstractions/nameservice>
@@ -60,13 +61,6 @@
 
   owner @{PROC}/[0-9]*/auxv r,
   owner @{PROC}/[0-9]*/fd/ r,
-
-  # For sound notifications
-  owner /tmp/orcexec.* mr,
-  # ... if /tmp is mounted noexec
-  owner @{HOME}/orcexec.* mr,
-  owner /{,var/}run/user/[0-9]*/ r,
-  owner /{,var/}run/user/[0-9]*/orcexec.* mrw,
 
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.pidgin>
