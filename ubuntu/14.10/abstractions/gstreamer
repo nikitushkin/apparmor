@@ -13,3 +13,5 @@
 
   owner /tmp/orcexec.* mrw,
   owner /{,var/}run/user/[0-9]*/orcexec.* mrw,
+  # needed if /tmp is mounted noexec:
+  owner @{HOME}/orcexec.* mr,
