@@ -54,6 +54,10 @@
   /usr/lib/pidgin/*.so rm,
   /usr/lib/purple*/*.so rm,
 
+  # pidgin-blinklight plugin
+  /usr/lib/pidgin-blinklight/blinklight-fixperm rPix,
+  @{PROC}/acpi/ibm/light rwk,
+
   /usr/share/purple/ca-certs/ r,
   /usr/share/purple/ca-certs/** r,
   /usr/share/tcltk/** r,
