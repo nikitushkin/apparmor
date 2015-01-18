@@ -39,6 +39,7 @@
   # NB: the preferred browser and proxy settings must be configured
   # in the GNOME preferences: this profile does not allow running
   # the corresponding external configuration applications.
+  /etc/purple/prefs.xml r,
   /usr/bin/gconftool-2 rPix,
   /usr/bin/gnome-open rmix,
   /usr/bin/gsettings rix,
