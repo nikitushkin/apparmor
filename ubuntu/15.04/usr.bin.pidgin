@@ -46,6 +46,8 @@
   /usr/bin/pidgin r,
   /usr/bin/xdg-open rmix,
 
+  /etc/purple/prefs.xml r,
+
   /usr/share/gnome/applications/ r,
   /usr/share/glib-2.0/schemas/gschemas.compiled r,
 
