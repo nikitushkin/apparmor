@@ -20,4 +20,6 @@
   owner @{HOME}/** rw,
 
   owner /{,var/}run/user/*/dconf/user w,
+  owner /{,var/}run/user/*/at-spi2-*/   rw,
+  owner /{,var/}run/user/*/at-spi2-*/** rw,
 }
