@@ -14,14 +14,14 @@
 
   # non-chrooted paths
   /etc/unbound/** r,
-  owner /etc/unbound/*.key rw,
-  owner /var/lib/unbound/root.key rw,
+  owner /etc/unbound/*.key* rw,
+  owner /var/lib/unbound/root.key* rw,
   audit deny /etc/unbound/unbound_control.{key,pem} rw,
   audit deny /etc/unbound/unbound_server.key w,
 
   # chrooted paths
   /var/lib/unbound/** r,
-  owner /var/lib/unbound/**/*.key rw,
+  owner /var/lib/unbound/**/*.key* rw,
   audit deny /var/lib/unbound/**/unbound_control.{key,pem} rw,
   audit deny /var/lib/unbound/**/unbound_server.key w,
 
