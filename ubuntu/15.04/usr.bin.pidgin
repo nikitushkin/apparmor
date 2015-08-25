@@ -6,8 +6,8 @@
   #include <abstractions/audio>
   #include <abstractions/base>
   #include <abstractions/bash>
-  #include <abstractions/dbus>
   #include <abstractions/dbus-session>
+  #include <abstractions/dbus-strict>
   #include <abstractions/dconf>
   #include <abstractions/enchant>
   #include <abstractions/gnome>
@@ -21,6 +21,21 @@
   #include <abstractions/ubuntu-helpers>
   #include <abstractions/user-download>
 
+  dbus receive
+       bus=system
+       path=/org/freedesktop/NetworkManager
+       interface=org.freedesktop.NetworkManager
+       member={CheckPermissions,DeviceAdded,DeviceRemoved,StateChanged,PropertiesChanged}
+       peer=(label=unconfined),
+
+  dbus send
+       bus=system
+       path=/org/freedesktop/NetworkManager
+       interface=org.freedesktop.NetworkManager
+       member=state
+       peer=(label=unconfined),
+
+  deny ptrace,
   deny capability sys_ptrace,
   deny @{HOME}/.local/share/applications/wine/ r,
 
@@ -52,7 +67,6 @@
 
   /etc/purple/prefs.xml r,
 
-  /usr/share/gnome/applications/ r,
   /usr/share/glib-2.0/schemas/gschemas.compiled r,
 
   /usr/lib/frei0r-1/*.so rm,
@@ -69,8 +83,8 @@
   /usr/share/tcltk/** r,
   /usr/share/themes/ r,
 
-  owner @{PROC}/[0-9]*/auxv r,
-  owner @{PROC}/[0-9]*/fd/ r,
+  owner @{PROC}/@{pid}/auxv r,
+  owner @{PROC}/@{pid}/fd/ r,
 
   # Site-specific additions and overrides. See local/README for details.
   #include <local/usr.bin.pidgin>
