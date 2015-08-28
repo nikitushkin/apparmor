@@ -79,7 +79,11 @@
   owner /tmp/pulse-*/pid rwk,
   owner /tmp/pulse-*/native rwk,
   owner /tmp/pulse-*/autospawn.lock rwk,
-  owner /tmp/orcexec.* rmw,
+
+  owner /tmp/orcexec.* mrw,
+  owner /{,var/}run/user/[0-9]*/orcexec.* mrw,
+  # needed if /tmp is mounted noexec:
+  owner @{HOME}/orcexec.* mr,
 
   # replace with @{pid}
   owner /tmp/.esd-[0-9]*/ rw,
