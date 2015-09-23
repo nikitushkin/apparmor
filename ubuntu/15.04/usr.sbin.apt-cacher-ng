@@ -24,4 +24,6 @@
   /bin/ed ixr,
   /bin/red ixr,
   /bin/sed ixr,
+
+  /usr/lib/apt-cacher-ng/acngtool ixr,
 }
