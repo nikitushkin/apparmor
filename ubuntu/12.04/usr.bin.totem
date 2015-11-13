@@ -12,6 +12,7 @@
   /usr/include/**/pyconfig.h r,
 
   /usr/bin/totem r,
+  /dev/sr* r,
 
   # Allow read and write on anything in @{HOME}. Lenient, but
   # private-files-strict is in effect.
