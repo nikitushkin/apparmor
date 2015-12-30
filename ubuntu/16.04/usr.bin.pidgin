@@ -41,6 +41,10 @@
 
   owner @{HOME}/.gstreamer*/ rw,
   owner @{HOME}/.gstreamer*/** rw,
+  owner @{HOME}/.cache/gstreamer-[0-9]*.[0-9]*/ rw,
+  owner @{HOME}/.cache/gstreamer-[0-9]*.[0-9]*/registry.*.bin rw,
+  owner @{HOME}/.cache/gstreamer-[0-9]*.[0-9]*/registry.*.bin.tmp* rw,
+  /usr/lib/@{multiarch}/gstreamer[0-9]*.[0-9]*/gstreamer-[0-9]*.[0-9]*/gst-plugin-scanner Pix -> gst_plugin_scanner,
   owner @{HOME}/.purple/ rw,
   owner @{HOME}/.purple/** rwk,
   owner @{HOME}/.config/indicators/ rw,
