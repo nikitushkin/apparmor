@@ -42,6 +42,7 @@
   /run/pulse/native rwk,
   /run/pulse/pid rwk,
   /run/udev/data/+sound:card* r,
+  /run/udev/data/c116:[0-9]* r,
 
   # logind
   /run/systemd/users/* r,
@@ -57,7 +58,7 @@
   /sys/devices/virtual/dmi/id/bios_vendor r,
   /sys/devices/virtual/dmi/id/board_vendor r,
   /sys/devices/virtual/dmi/id/sys_vendor r,
-  /sys/devices/**/sound/card[0-9]*/uevent r,
+  /sys/devices/virtual/sound/**/uevent r,
 
   /usr/share/alsa/** r,
   /usr/share/applications/ r,
