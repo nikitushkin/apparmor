@@ -47,8 +47,8 @@
   /run/udev/data/c116:[0-9]* r,
 
   # logind
-  /run/systemd/users/* r,
-  /run/user/*/dconf/user k,
+  /run/systemd/users/[0-9]* r,
+  /run/user/[0-9]*/dconf/user k,
 
   /sys/bus/ r,
   /sys/class/ r,
@@ -98,9 +98,8 @@
   # needed if /tmp is mounted noexec:
   owner @{HOME}/orcexec.* mr,
 
-  # replace with @{pid}
-  owner /tmp/.esd-[0-9]*/ rw,
-  owner /tmp/.esd-[0-9]*/socket rw,
+  owner /tmp/.esd-@{pid}*/ rw,
+  owner /tmp/.esd-@{pid}*/socket rw,
 
   profile /usr/lib/pulseaudio/pulse/gconf-helper {
     #include <abstractions/base>
