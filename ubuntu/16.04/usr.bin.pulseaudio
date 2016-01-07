@@ -73,10 +73,9 @@
 
   owner /var/lib/lightdm/.Xauthority r,
   owner /var/lib/lightdm/.esd_auth rwk,
-  owner /var/lib/lightdm/.pulse-cookie rwk,
-  owner /var/lib/lightdm/.pulse/ rw,
-  owner /var/lib/lightdm/.pulse/* w,
-  owner /var/lib/lightdm/.pulse/* r,
+  owner /var/lib/lightdm/.config/pulse/cookie rwk,
+  owner /var/lib/lightdm/.config/pulse/ rw,
+  owner /var/lib/lightdm/.config/pulse/* rw,
 
   # are these needed?
   /var/lib/pulse/ rw,
