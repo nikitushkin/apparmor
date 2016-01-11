@@ -6,6 +6,8 @@
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
+  capability chown,
+  capability dac_override,
   capability net_bind_service,
   capability setgid,
   capability setuid,
