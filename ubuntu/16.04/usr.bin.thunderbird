@@ -8,7 +8,7 @@
 
 #include <tunables/global>
 
-/usr/lib/thunderbird/thunderbird {
+profile thunderbird /usr/lib/thunderbird/thunderbird {
   #include <abstractions/audio>
   #include <abstractions/aspell>
   #include <abstractions/cups-client>
