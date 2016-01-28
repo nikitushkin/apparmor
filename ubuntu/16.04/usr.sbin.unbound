@@ -6,6 +6,13 @@
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
+  # needlessly chown'ing the PID, for details see:
+  # https://www.nlnetlabs.nl/bugs-script/show_bug.cgi?id=734
+  deny capability chown,
+  deny capability dac_override,
+
+  capability fowner,
+  capability fsetid,
   capability net_bind_service,
   capability setgid,
   capability setuid,
@@ -14,6 +21,9 @@
 
   # root trust anchor
   owner /var/lib/unbound/root.key* rw,
+
+  # root hints from dns-data-root
+  /usr/share/dns/root.* r,
 
   # non-chrooted paths
   /etc/unbound/** r,
@@ -32,4 +42,7 @@
   /usr/sbin/unbound mr,
 
   /{,var/}run/unbound.pid rw,
+
+  # Unix control socket
+  /{,var/}run/unbound.ctl rw,
 }
