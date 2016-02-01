@@ -12,8 +12,6 @@
   deny capability chown,
   deny capability dac_override,
 
-  capability fowner,
-  capability fsetid,
   capability net_bind_service,
   capability setgid,
   capability setuid,
