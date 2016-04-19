@@ -13,8 +13,8 @@
   owner /etc/ceph/* rw,
   /etc/passwd r,
 
-  /proc/${pid}/auxv r,
-  /proc/${pid}/net/dev r,
+  /proc/@{pid}/auxv r,
+  /proc/@{pid}/net/dev r,
 
   /run/ceph/* rw,
   /tmp/ r,
