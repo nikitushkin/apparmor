@@ -168,6 +168,7 @@ profile thunderbird /usr/lib/thunderbird/thunderbird {
   /usr/bin/mkfifo Uxr,  # investigate
   /bin/ps Uxr,
   /bin/uname Uxr,
+  /usr/bin/locale Uxr,
 
   /usr/bin/gpg Cx -> gpg,
 
@@ -221,6 +222,13 @@ profile thunderbird /usr/lib/thunderbird/thunderbird {
     #include <abstractions/p11-kit>
     /usr/lib/gnupg2/gpg2keys_hkp ix,
 
+    # silence noise from enigmail 1.9+
+    deny owner @{HOME}/.thunderbird/*/.parentlock w,
+    deny owner @{HOME}/.thunderbird/*/panacea.dat w,
+    deny owner @{HOME}/.thunderbird/*/*.mab w,
+    deny owner @{HOME}/.thunderbird/**/*.msf w,
+    deny owner @{HOME}/.cache/thunderbird/**/_CACHE_* w,
+
     # For smartcards?
     /dev/bus/usb/ r,
     /dev/bus/usb/[0-9]*/ r,
@@ -246,10 +254,15 @@ profile thunderbird /usr/lib/thunderbird/thunderbird {
     owner @{HOME}/.gnupg/.#lk0x[0-9a-f]* rwl,
     owner @{HOME}/.gnupg/.gpg-v[0-9]*-migrated rw,
     owner @{HOME}/** r,
+    owner @{PROC}/@{pids}/mountinfo r,
 
     # for inline pgp
     owner /tmp/encfile rw,
     owner /tmp/encfile-[0-9]* rw,
+
+    # for signature generation
+    owner /tmp/nsemail.eml w,
+    owner /tmp/nsemail-[0-9]*.eml w,
 
     # for signature verifications
     owner /tmp/data.sig r,
