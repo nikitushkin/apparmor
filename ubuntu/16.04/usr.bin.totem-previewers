@@ -14,6 +14,8 @@
   # Not needed by nautilus, but maybe other applications
   owner /**.[pP][nN][gG] w,
   owner /**.[jJ][pP]{,[eE]}[gG] w,
+
+  /usr/bin/totem-video-thumbnailer r,
 }
 
 /usr/bin/totem-audio-preview {
