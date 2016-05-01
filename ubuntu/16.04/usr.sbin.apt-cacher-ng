@@ -19,6 +19,7 @@
   @{APT_CACHE_DIR}/** rw,
   /var/log/apt-cacher-ng/ r,
   /var/log/apt-cacher-ng/* rw,
+  /{,var/}run/systemd/notify w,
 
   /bin/dash ixr,
   /bin/ed ixr,
