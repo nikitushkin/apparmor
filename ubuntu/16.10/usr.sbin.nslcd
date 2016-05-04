@@ -21,8 +21,6 @@
   capability setgid,
   capability setuid,
 
-  deny network inet  dgram,
-  deny network inet6 dgram,
   deny network netlink raw,
 
   /etc/nslcd.conf r,
