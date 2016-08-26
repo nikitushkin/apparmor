@@ -4,13 +4,13 @@
 
 #include <tunables/global>
 
-profile notify-reboot-required /usr/share/update-notifier/notify-reboot-required {
+profile notify-reboot-required /usr/share/{update,reboot}-notifier/notify-reboot-required {
 
   #include <abstractions/base>
 
   /usr/bin/gettext Pix,
 
-  /usr/share/update-notifier/notify-reboot-required r,
+  /usr/share/{update,reboot}-notifier/notify-reboot-required r,
 
   /{var/,}run/reboot-required rw,
   /{var/,}run/reboot-required.pkgs rw,
