@@ -47,6 +47,7 @@
   owner /run/user/[0-9]*/pulse/* rwk,
   /run/udev/data/+sound:card* r,
   /run/udev/data/c116:[0-9]* r,
+  /run/udev/data/c14:[0-9]* r,
 
   # logind
   /run/systemd/users/[0-9]* r,
@@ -108,4 +109,7 @@
 
     /usr/lib/pulseaudio/pulse/gconf-helper mr,
   }
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.pulseaudio>
 }
