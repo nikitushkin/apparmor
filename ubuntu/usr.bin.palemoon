@@ -43,6 +43,8 @@
 
   # firefox specific
   /etc/palemoon*/** r,
+  /usr/lib/** ix,
+  /usr/bin/* ix,
   /etc/xul-ext/** r,
   /etc/xulrunner{,-[0-9]*}/** r,
   /etc/gre.d/* r,
@@ -62,13 +64,10 @@
 
   # These are needed when a new user starts firefox and firefox.sh is used
   /usr/lib/palemoon{,-[0-9]*}/** ixr,
-  deny /usr/lib/palemoon/palemoon x,
   /usr/bin/basename ixr,
-  /usr/bin/dirname ixr,
-  /usr/bin/pwd ixr,
+  /usr/bin/ ixr,
+  /bin/* ixr,
   /sbin/killall5 ixr,
-  /bin/which ixr,
-  /usr/bin/tr ixr,
   @{PROC}/@{pid}/cmdline r,
   @{PROC}/@{pid}/mountinfo r,
   @{PROC}/@{pid}/stat r,
@@ -96,14 +95,11 @@
 
   # Default profile allows downloads to ~/Downloads and uploads from ~/Public
   owner @{HOME}/ r,
+  owner @{HOME}/** r,
   owner @{HOME}/Public/ r,
   owner @{HOME}/Public/** r,
   owner @{HOME}/Downloads/ r,
   owner @{HOME}/Downloads/** rw,
-  owner @{HOME}/Documents/ r,
-  owner @{HOME}/Documents/** rw,
-  owner @{HOME}/Pictures/ r,
-  owner @{HOME}/Pictures/** rw,
   owner @{HOME}/Загрузки/ r,
   owner @{HOME}/Загрузки/** rw,
   owner @{HOME}/Документы/ r,
